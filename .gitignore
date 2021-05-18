@@ -6,6 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
+# OneBusAway export files
+**/*.csv
+**/*.kml
+**/*.kmz
+
 # Distribution / packaging
 .Python
 build/
