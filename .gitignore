@@ -10,6 +10,11 @@ __pycache__/
 **/*.csv
 **/*.kml
 **/*.kmz
+**/*.xlsx
+**/*.xls
+**/*.xlsb
+**/*.xlsm
+**/*.xl*
 
 # Distribution / packaging
 .Python
