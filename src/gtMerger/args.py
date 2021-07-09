@@ -25,9 +25,9 @@ def get_parser():
 
     parser.add_argument('--dataDir', type=str, default='data', help='Folder including the subfolder related to each GT Data files')
 
-    parser.add_argument('--minActivitySpan', type=float, default=5, help='Minimum activity time span (minutes, defalut value = 5), shorter activities will be droped before merging.')
+    parser.add_argument('--minActivitySpan', type=float, default=5, help='Minimum activity time span (minutes, defalut value = 5), shorter activities will be dropped before merging.')
 
-    parser.add_argument('--minTripLength', type=int, default=50, help='Minimum length distance (meters, default value 50) for a trip. Shorter trips will be droped before merging')
+    parser.add_argument('--minTripLength', type=int, default=50, help='Minimum length distance (meters, default value 50) for a trip. Shorter trips will be dropped before merging')
 
     parser.add_argument('--tolerance', type=int, default=3000, help='Maximum toleradted difference (milliseconds, default value 3000) between matched ground truth data activity and OBA data activity')
 
