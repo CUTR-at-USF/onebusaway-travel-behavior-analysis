@@ -52,7 +52,7 @@ def main(args):
     print(oba_data.info())
 
     # Data preprocessing is over
-    merged_data_frame = pd.merge_asof(gt_data, oba_data, on="ClosestTime", direction="nearest", tolerance=pd.Timedelta("2000ms"))
+    merged_data_frame = pd.merge_asof(gt_data, oba_data, on="ClosestTime", direction="nearest", tolerance=pd.Timedelta(str(args.tolerance)+"ms"))
     print(merged_data_frame.head())
 
     # Save to csv
