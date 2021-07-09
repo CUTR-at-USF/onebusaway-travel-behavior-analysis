@@ -29,12 +29,12 @@ import pytz
 
 def main(args):
     # Verify the if the data folder exists
-    if (not os.path.isdir(args.data_dir)):
-        print("Data folder not found:", args.data_dir)
+    if (not os.path.isdir(args.dataDir)):
+        print("Data folder not found:", args.dataDir)
         exit()
 
     # Create path OS independent for excel file
-    excel_path = os.path.join(args.data_dir, "TH trips ExtraHeaders.xlsx")
+    excel_path = os.path.join(args.dataDir, "TH trips ExtraHeaders.xlsx")
     # Load ground truth data to a dataframe
     gt_data = pd.read_excel(excel_path)
     
@@ -43,7 +43,7 @@ def main(args):
     print(gt_data.info())
 
     # Create path OS independent for csv file
-    csv_path = os.path.join(args.data_dir, "travel-behavior.csv")
+    csv_path = os.path.join(args.dataDir, "travel-behavior.csv")
     # Load OBA data
     oba_data = pd.read_csv(csv_path)
     # Preprocess OBA data
@@ -56,7 +56,7 @@ def main(args):
     print(merged_data_frame.head())
 
     # Save to csv
-    merged_file_path = os.path.join(args.data_dir, "mergedData.csv")
+    merged_file_path = os.path.join(args.dataDir, "mergedData.csv")
     merged_data_frame.to_csv(path_or_buf =merged_file_path, index=False)
     
 
@@ -68,14 +68,14 @@ def preprocessObaData(data_csv, args):
     clean_data_csv = data_csv.dropna(subset= ['Activity Start Date and Time* (UTC)', 'Origin location Date and Time (*best) (UTC)', 
     'Duration* (minutes)', 'Origin-Destination Bird-Eye Distance* (meters)'])
 
-    # Remove trips with Duration less than args.min_activity_span mins and distance les than args.min_trip_length
-    clean_data_csv = clean_data_csv[(data_csv['Duration* (minutes)']>=args.min_activity_span) & (data_csv['Origin-Destination Bird-Eye Distance* (meters)']>=args.min_trip_length)]
+    # Remove trips with Duration less than args.minActivitySpan mins and distance les than args.minTripLength
+    clean_data_csv = clean_data_csv[(data_csv['Duration* (minutes)']>=args.minActivitySpan) & (data_csv['Origin-Destination Bird-Eye Distance* (meters)']>=args.minTripLength)]
 
     # Add the data to be dropped to a data frame
     data_csv_dropped = pd.merge(data_csv, clean_data_csv, how='outer', indicator=True).query("_merge != 'both'").drop('_merge', axis=1).reset_index(drop=True)
 
     # Save data to be dropped to a csv file
-    dropped_file_path = os.path.join(args.data_dir, "droppedObaData.csv")
+    dropped_file_path = os.path.join(args.dataDir, "droppedObaData.csv")
     data_csv_dropped.to_csv(path_or_buf = dropped_file_path, index=False)
     
     # Add column to be used in merge_asoft
@@ -101,7 +101,7 @@ def preprocessGtData(gt_data):
     # Add the data to be dropped to a data frame
     data_gt_dropped = pd.merge(gt_data, clean_gt_data, how='outer', indicator=True).query("_merge != 'both'").drop('_merge', axis=1).reset_index(drop=True)
     # Save data to be dropped to a csv file
-    dropped_file_path = os.path.join(args.data_dir, "droppedGtData.csv")
+    dropped_file_path = os.path.join(args.dataDir, "droppedGtData.csv")
     data_gt_dropped.to_csv(path_or_buf = dropped_file_path, index=False)
 
     # Create GT_DateTimeCombined column
