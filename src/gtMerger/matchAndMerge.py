@@ -70,6 +70,20 @@ def main(args):
     
 
 def preprocessObaData(data_csv, args):
+    """ Preprocess the csv data file from oba-firebase-export as follows:
+        - Change activity start date datatype from str to datetime
+        - Drop observations whose activity start date are NaN after data type conversion
+        - Drop observations that does not mathc the time span and distance requirements from args
+          minActivitySpan and minTripLength
+        - Add column reuired to be used as key while merging with ground truth data
+    
+    Args:
+        data_csv: A data frame loaded from a csv file genrated by oba-firebase-export
+        args: List of arguments from command prompt
+
+    Retunrs:
+        Preprocessed dataframe
+    """
     # Change Activity Start Date and Time* (UTC) to datetime
     data_csv['Activity Start Date and Time* (UTC)']= pd.to_datetime(data_csv['Activity Start Date and Time* (UTC)'], errors='coerce', utc=True)
     
