@@ -33,6 +33,15 @@ def main(args):
         print("Data folder not found:", args.dataDir)
         exit()
 
+    # Create sub-folders for ouput an logs
+    path_logs = os.path.join(args.dataDir, "logs")
+    if (not os.path.isdir(path_logs)):
+        os.mkdir(path_logs)
+    
+    path_output = os.path.join(args.dataDir, "output")
+    if (not os.path.isdir(path_output)):
+        os.mkdir(path_output)
+
     # Create path OS independent for excel file
     excel_path = os.path.join(args.dataDir, "TH trips ExtraHeaders.xlsx")
     # Load ground truth data to a dataframe
@@ -56,7 +65,7 @@ def main(args):
     print(merged_data_frame.head())
 
     # Save to csv
-    merged_file_path = os.path.join(args.dataDir, "mergedData.csv")
+    merged_file_path = os.path.join(args.dataDir, "output", "mergedData.csv")
     merged_data_frame.to_csv(path_or_buf =merged_file_path, index=False)
     
 
@@ -75,7 +84,7 @@ def preprocessObaData(data_csv, args):
     data_csv_dropped = pd.merge(data_csv, clean_data_csv, how='outer', indicator=True).query("_merge != 'both'").drop('_merge', axis=1).reset_index(drop=True)
 
     # Save data to be dropped to a csv file
-    dropped_file_path = os.path.join(args.dataDir, "droppedObaData.csv")
+    dropped_file_path = os.path.join(args.dataDir, "logs", "droppedObaData.csv")
     data_csv_dropped.to_csv(path_or_buf = dropped_file_path, index=False)
     
     # Add column to be used in merge_asoft
@@ -101,7 +110,7 @@ def preprocessGtData(gt_data):
     # Add the data to be dropped to a data frame
     data_gt_dropped = pd.merge(gt_data, clean_gt_data, how='outer', indicator=True).query("_merge != 'both'").drop('_merge', axis=1).reset_index(drop=True)
     # Save data to be dropped to a csv file
-    dropped_file_path = os.path.join(args.dataDir, "droppedGtData.csv")
+    dropped_file_path = os.path.join(args.dataDir, "logs", "droppedGtData.csv")
     data_gt_dropped.to_csv(path_or_buf = dropped_file_path, index=False)
 
     # Create GT_DateTimeCombined column
