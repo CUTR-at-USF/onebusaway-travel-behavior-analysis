@@ -108,6 +108,7 @@ def preprocessObaData(data_csv, args):
 
 def preprocessGtData(gt_data):
     """ Preprocess the ground Truth xlsx data file as follows:
+        - Remove unnmed coulmns is exist
         - Change activity start date datatype from str to datetime
         - Drop observations whose activity start date are NaN after data type conversion
         - Drop observations that does not mathc the time span and distance requirements from args
