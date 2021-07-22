@@ -122,7 +122,7 @@ def preprocessGtData(gt_data):
         args: List of arguments from command prompt
 
     Returns:
-        Preprocessed dataframe
+        Preprocessed gt dataframe
     """
     # Drop unnamed columns
     unnamed_cols = [col for col in gt_data.columns if 'Unnamed' in col]
