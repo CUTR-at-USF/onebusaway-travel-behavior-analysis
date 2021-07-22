@@ -81,7 +81,7 @@ def preprocessObaData(data_csv, args):
         data_csv: A data frame loaded from a csv file genrated by oba-firebase-export
         args: List of arguments from command prompt
 
-    Retunrs:
+    Returns:
         Preprocessed dataframe
     """
     # Change Activity Start Date and Time* (UTC) to datetime
@@ -107,6 +107,20 @@ def preprocessObaData(data_csv, args):
     return clean_data_csv
 
 def preprocessGtData(gt_data):
+    """ Preprocess the ground Truth xlsx data file as follows:
+        - Change activity start date datatype from str to datetime
+        - Drop observations whose activity start date are NaN after data type conversion
+        - Drop observations that does not mathc the time span and distance requirements from args
+          minActivitySpan and minTripLength
+        - Add column reuired to be used as key while merging with ground truth data
+    
+    Args:
+        data_csv: A data frame loaded from a csv file genrated by oba-firebase-export
+        args: List of arguments from command prompt
+
+    Returns:
+        Preprocessed dataframe
+    """
     # Drop unnamed columns
     unnamed_cols = [col for col in gt_data.columns if 'Unnamed' in col]
     gt_data = gt_data.drop(unnamed_cols, axis=1)
