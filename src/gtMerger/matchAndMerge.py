@@ -75,7 +75,7 @@ def preprocessObaData(data_csv, args):
         - Drop observations whose activity start date are NaN after data type conversion
         - Drop observations that does not mathc the time span and distance requirements from args
           minActivitySpan and minTripLength
-        - Add column reuired to be used as key while merging with ground truth data
+        - Add column required to be used as key while merging with ground truth data
     
     Args:
         data_csv: A data frame loaded from a csv file genrated by oba-firebase-export
@@ -108,15 +108,17 @@ def preprocessObaData(data_csv, args):
 
 def preprocessGtData(gt_data):
     """ Preprocess the ground Truth xlsx data file as follows:
-        - Remove unnmed coulmns is exist
-        - Change activity start date datatype from str to datetime
-        - Drop observations whose activity start date are NaN after data type conversion
-        - Drop observations that does not mathc the time span and distance requirements from args
-          minActivitySpan and minTripLength
-        - Add column reuired to be used as key while merging with ground truth data
+        - Remove unnmed coulmns if exist
+        - Replace ? by 0 to correct possible not rounded seconds
+        - Change the column to datetime.time
+        - Drop rows with NaN on GT_Date or GT_TimeOrig  after data type conversion
+        - Create GT_DateTimeCombined column joining GT_Date and GT_TimeOrig columns
+        - Assign timezone to GT_DateTimeCombined
+        - Add column required to be used as key while merging with ground truth data
+        - Generates a log with the dropped rows during the preprocess
     
     Args:
-        data_csv: A data frame loaded from a csv file genrated by oba-firebase-export
+        gt_data: A data frame loaded from a xls file genrated manually from GT data collection process
         args: List of arguments from command prompt
 
     Returns:
@@ -145,7 +147,7 @@ def preprocessGtData(gt_data):
     # Create GT_DateTimeCombined column
     clean_gt_data.loc[:,'GT_DateTimeCombined'] = clean_gt_data.apply(lambda x: datetime.datetime.combine(x.GT_Date, x.GT_TimeOrig), 1)
 
-    #Assign timezone to GT_DateTimeCombined
+    # Assign timezone to GT_DateTimeCombined
     clean_gt_data.loc[:,'GT_DateTimeCombined'] = clean_gt_data.apply(lambda x: pytz.timezone(x.GT_TimeZone).localize(x.GT_DateTimeCombined), 1)
     
     # Add column to be used in merge_asoft
