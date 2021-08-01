@@ -1,6 +1,6 @@
-'''
+"""
 /*
- * Copyright (C) 2019-2020 University of South Florida
+ * Copyright (C) 2019-2021 University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- '''
+ """
 
 # Import dependencies
-import os, argparse
+import argparse
+
 
 def get_parser():
-
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--dataDir', type=str, default='data', help='Folder including the subfolder related to each GT Data files')
+    parser.add_argument('--dataDir', type=str, default='data',
+                        help='Folder including the subfolder related to each GT Data files')
 
-    parser.add_argument('--minActivitySpan', type=float, default=5, help='Minimum activity time span (minutes, defalut value = 5), shorter activities will be dropped before merging.')
+    parser.add_argument('--minActivityDuration', type=float, default=5,
+                        help='Minimum activity time span (minutes, defalut value = 5), shorter activities will be dropped before merging.')
 
-    parser.add_argument('--minTripLength', type=int, default=50, help='Minimum length distance (meters, default value 50) for a trip. Shorter trips will be dropped before merging')
+    parser.add_argument('--minTripLength', type=int, default=50,
+                        help='Minimum length distance (meters, default value 50) for a trip. Shorter trips will be dropped before merging')
 
-    parser.add_argument('--tolerance', type=int, default=3000, help='Maximum toleradted difference (milliseconds, default value 3000) between matched ground truth data activity and OBA data activity')
+    parser.add_argument('--tolerance', type=int, default=3000,
+                        help='Maximum toleradted difference (milliseconds, default value 3000) between matched ground truth data activity and OBA data activity')
 
     args = parser.parse_args()
 
