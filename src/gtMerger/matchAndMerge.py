@@ -18,6 +18,7 @@
 
 import datetime
 import os
+from pathlib import Path
 
 import pandas as pd
 import pytz
@@ -28,23 +29,45 @@ from args import get_parser
 
 # -------------------------------------------
 
-def main(args):
-    # Verify if the data folder exists
-    if not os.path.isdir(args.dataDir):
-        print("Data folder not found:", args.dataDir)
+def main(mainArgs):
+    # Verify if the OBA input file exists
+    if not os.path.isfile(mainArgs.obaFile):
+        print("OBA data file not found:", mainArgs.obaFile)
         exit()
 
-    # Create sub-folders for output an logs
-    path_logs = os.path.join(args.dataDir, "logs")
-    if not os.path.isdir(path_logs):
-        os.mkdir(path_logs)
+    # Verify if GT input file exists
+    if not os.path.isfile(mainArgs.gtFile):
+        print("Ground truth data file not found:", mainArgs.gtFile)
+        exit()
 
-    path_output = os.path.join(args.dataDir, "output")
+    # Verify if the data folder exists
+    if not os.path.isdir(mainArgs.dataDir):
+        print("Data folder not found, trying to create it in the current working directory:", mainArgs.dataDir)
+        try:
+            os.makedirs(mainArgs.dataDir, exist_ok=True)
+        except OSError:
+            print("There was an error while creating the data folder:", mainArgs.dataDir)
+            exit()
+
+    # Create sub-folders for output an logs
+    path_logs = os.path.join(mainArgs.dataDir, "logs")
+    if not os.path.isdir(path_logs):
+        try:
+            os.mkdir(path_logs)
+        except OSError:
+            print("There was an error while creating the sub folder for logs:", path_logs)
+            exit()
+
+    path_output = os.path.join(mainArgs.dataDir, "output")
     if not os.path.isdir(path_output):
-        os.mkdir(path_output)
+        try:
+            os.mkdir(path_output)
+        except OSError:
+            print("There was an error while creating the sub folder for output files:", path_logs)
+            exit()
 
     # Create path OS independent for excel file
-    excel_path = os.path.join(args.dataDir, "TH trips ExtraHeaders.xlsx")
+    excel_path = Path(mainArgs.gtFile)
     # Load ground truth data to a dataframe
     gt_data = pd.read_excel(excel_path)
 
@@ -53,21 +76,21 @@ def main(args):
     print(gt_data.info())
 
     # Create path OS independent for csv file
-    csv_path = os.path.join(args.dataDir, "travel-behavior.csv")
+    csv_path = Path(mainArgs.obaFile)
     # Load OBA data
     oba_data = pd.read_csv(csv_path)
     # Preprocess OBA data
-    oba_data = preprocessObaData(oba_data, args)
+    oba_data = preprocessObaData(oba_data, mainArgs)
     print("OBA data info()\n")
     print(oba_data.info())
 
     # Data preprocessing is over
     merged_data_frame = pd.merge_asof(gt_data, oba_data, on="ClosestTime", direction="nearest",
-                                      tolerance=pd.Timedelta(str(args.tolerance) + "ms"))
+                                      tolerance=pd.Timedelta(str(mainArgs.tolerance) + "ms"))
     print(merged_data_frame.head())
 
     # Save to csv
-    merged_file_path = os.path.join(args.dataDir, "output", "mergedData.csv")
+    merged_file_path = os.path.join(mainArgs.dataDir, "output", "mergedData.csv")
     merged_data_frame.to_csv(path_or_buf=merged_file_path, index=False)
 
 
@@ -116,7 +139,6 @@ def preprocessObaData(data_csv, args):
 def preprocessGtData(gt_data):
     """ Preprocess the ground Truth xlsx data file as follows:
         - Remove unnamed columns if exist
-        - Replace ? by 0 to correct possible not rounded seconds
         - Change the column to datetime.time
         - Drop rows with NaN on GT_Date or GT_TimeOrig  after data type conversion
         - Create GT_DateTimeCombined column joining GT_Date and GT_TimeOrig columns
@@ -134,9 +156,8 @@ def preprocessGtData(gt_data):
     unnamed_cols = [col for col in gt_data.columns if 'Unnamed' in col]
     gt_data = gt_data.drop(unnamed_cols, axis=1)
 
-    # Replace ? by 0 to correct possible not rounded seconds
+    # Change data type of TimeOrig to string to simplify date time conversions
     gt_data.GT_TimeOrig = gt_data.GT_TimeOrig.astype(str)
-    gt_data['GT_TimeOrig'] = gt_data['GT_TimeOrig'].str.replace('?', '0')
 
     # Change the column to datetime.time, coerce will produce NaN if the change is not possible
     gt_data['GT_TimeOrig'] = pd.to_datetime(gt_data['GT_TimeOrig'], errors='coerce').dt.time
