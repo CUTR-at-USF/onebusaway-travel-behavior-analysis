@@ -73,7 +73,7 @@ def main(mainArgs):
 
     # Preprocess ground truth data
     gt_data = preprocessGtData(gt_data)
-    print(gt_data.info())
+    print("Ground truth data preprocessed.")
 
     # Create path OS independent for csv file
     csv_path = Path(mainArgs.obaFile)
@@ -81,15 +81,12 @@ def main(mainArgs):
     oba_data = pd.read_csv(csv_path)
     # Preprocess OBA data
     oba_data = preprocessObaData(oba_data, mainArgs)
-    print("OBA data info()\n")
-    print(oba_data.info())
+    print("OBA data preprocessed.")
 
     # Data preprocessing is over
-    merged_data_frame = pd.merge_asof(gt_data, oba_data, on="ClosestTime", direction="nearest",
-                                      tolerance=pd.Timedelta(str(mainArgs.tolerance) + "ms"))
-    print(merged_data_frame.head())
+    merged_data_frame = merge(gt_data, oba_data)
 
-    # Save to csv
+    # Save merged data to csv
     merged_file_path = os.path.join(mainArgs.dataDir, "output", "mergedData.csv")
     merged_data_frame.to_csv(path_or_buf=merged_file_path, index=False)
 
@@ -120,7 +117,7 @@ def preprocessObaData(data_csv, args):
 
     # Remove trips with Duration less than args.minActivityDuration minutes and distance les than args.minTripLength
     clean_data_csv = clean_data_csv[(data_csv['Duration* (minutes)'] >= args.minActivityDuration) & (
-                data_csv['Origin-Destination Bird-Eye Distance* (meters)'] >= args.minTripLength)]
+            data_csv['Origin-Destination Bird-Eye Distance* (meters)'] >= args.minTripLength)]
 
     # Add the data to be dropped to a data frame
     data_csv_dropped = pd.merge(data_csv, clean_data_csv, how='outer', indicator=True).query("_merge != 'both'").drop(
@@ -131,7 +128,7 @@ def preprocessObaData(data_csv, args):
     data_csv_dropped.to_csv(path_or_buf=dropped_file_path, index=False)
 
     # Add column to be used in function "merge_asoft"
-    clean_data_csv['ClosestTime'] = clean_data_csv['Activity Start Date and Time* (UTC)']
+    # clean_data_csv['ClosestTime'] = clean_data_csv['Activity Start Date and Time* (UTC)']
 
     return clean_data_csv
 
@@ -183,6 +180,36 @@ def preprocessGtData(gt_data):
     # Add column to be used in function "merge_asoft"
     clean_gt_data['ClosestTime'] = clean_gt_data['GT_DateTimeCombined'].dt.tz_convert('UTC')
     return clean_gt_data
+
+
+def merge(gt_data, oba_data):
+    """
+    Merge gt_data dataframe and oba_data dataframe using the nearest value between columns 'gt_data.ClosestTime' and
+    'oba_data.Activity Start Date and Time* (UTC)'. Before merging, the data is grouped by 'GT_Collector' on gt_data and
+    each row on gt_data will be paired with one or none of the rows on oba_data grouped by userId.
+    :param gt_data: dataframe with preprocessed data from ground truth XLSX data file
+    :param oba_data: dataframe with preprocessed data from OBA firebase export CSV data file
+    :return: dataframe with the merged data.
+    """
+    list_collectors = gt_data['GT_Collector'].unique()
+    list_oba_users = oba_data['User ID'].unique()
+
+    merged_df = pd.DataFrame()
+    for collector in list_collectors:
+        print("Merging data for collector ", collector)
+        # Create dataframe for a collector on list_collectors
+        gt_data_collector = gt_data[gt_data["GT_Collector"] == collector]
+        for oba_user in list_oba_users:
+            print("\t Oba user", oba_user)
+            # Create a dataframe with the oba_user activities only
+            oba_data_user = oba_data[oba_data["User ID"] == oba_user]
+
+            temp_merge = pd.merge_asof(gt_data_collector, oba_data_user, left_on="ClosestTime",
+                                       right_on="Activity Start Date and Time* (UTC)",
+                                       direction="nearest",
+                                       tolerance=pd.Timedelta(str(args.tolerance) + "ms"))
+            merged_df = pd.concat([merged_df, temp_merge], ignore_index=True)
+    return merged_df
 
 
 if __name__ == '__main__':
