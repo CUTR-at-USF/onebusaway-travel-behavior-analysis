@@ -63,7 +63,7 @@ def main():
         try:
             os.mkdir(path_output)
         except OSError:
-            print("There was an error while creating the sub folder for output files:", path_logs)
+            print("There was an error while creating the sub-folder for output files:", path_logs)
             exit()
 
     # Create path OS independent for excel file
@@ -114,7 +114,7 @@ def preprocessObaData(data_csv):
         subset=['Activity Start Date and Time* (UTC)', 'Origin location Date and Time (*best) (UTC)',
                 'Duration* (minutes)', 'Origin-Destination Bird-Eye Distance* (meters)'])
 
-    # Remove trips with Duration less than command_line_args.minActivityDuration minutes and distance les than
+    # Remove trips with Duration less than command_line_args.minActivityDuration minutes and distance less than
     # command_line_args.minTripLength
     clean_data_csv = clean_data_csv[(data_csv['Duration* (minutes)'] >= command_line_args.minActivityDuration) & (
             data_csv['Origin-Destination Bird-Eye Distance* (meters)'] >= command_line_args.minTripLength)]
@@ -126,9 +126,6 @@ def preprocessObaData(data_csv):
     # Save data to be dropped to a csv file
     dropped_file_path = os.path.join(command_line_args.dataDir, "logs", "droppedObaData.csv")
     data_csv_dropped.to_csv(path_or_buf=dropped_file_path, index=False)
-
-    # Add column to be used in function "merge_asoft"
-    # clean_data_csv['ClosestTime'] = clean_data_csv['Activity Start Date and Time* (UTC)']
 
     return clean_data_csv
 
@@ -200,7 +197,7 @@ def merge(gt_data, oba_data):
         # Create dataframe for a collector on list_collectors
         gt_data_collector = gt_data[gt_data["GT_Collector"] == collector]
         for oba_user in list_oba_users:
-            print("\t Oba user", oba_user)
+            print("\t Oba user", oba_user[-4:])
             # Create a dataframe with the oba_user activities only
             oba_data_user = oba_data[oba_data["User ID"] == oba_user]
 
