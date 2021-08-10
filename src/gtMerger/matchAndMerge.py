@@ -196,10 +196,14 @@ def merge(gt_data, oba_data):
         print("Merging data for collector ", collector)
         # Create dataframe for a collector on list_collectors
         gt_data_collector = gt_data[gt_data["GT_Collector"] == collector]
+        # Make sure dataframe is sorted by 'ClosesTime'
+        gt_data_collector.sort_values('ClosestTime', inplace=True)
         for oba_user in list_oba_users:
             print("\t Oba user", oba_user[-4:])
             # Create a dataframe with the oba_user activities only
             oba_data_user = oba_data[oba_data["User ID"] == oba_user]
+            # Make sure dataframes is sorted by 'Activity Start Date and Time* (UTC)'
+            oba_data_user.sort_values('Activity Start Date and Time* (UTC)', inplace=True)
 
             temp_merge = pd.merge_asof(gt_data_collector, oba_data_user, left_on="ClosestTime",
                                        right_on="Activity Start Date and Time* (UTC)",
