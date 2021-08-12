@@ -72,7 +72,7 @@ def main():
     gt_data = pd.read_excel(excel_path)
 
     # Preprocess ground truth data
-    gt_data = preprocessGtData(gt_data)
+    gt_data = preprocess_gt_data(gt_data)
     print("Ground truth data preprocessed.")
 
     # Create path OS independent for csv file
@@ -80,10 +80,15 @@ def main():
     # Load OBA data
     oba_data = pd.read_csv(csv_path)
     # Preprocess OBA data
-    oba_data = preprocessObaData(oba_data)
+    oba_data, data_csv_dropped = preprocess_oba_data(oba_data)
     print("OBA data preprocessed.")
 
     # Data preprocessing is over
+    # Save oba dropped data to a csv file
+    dropped_file_path = os.path.join(command_line_args.dataDir, "logs", "droppedObaData.csv")
+    data_csv_dropped.to_csv(path_or_buf=dropped_file_path, index=False)
+
+    # merge dataframes
     merged_data_frame = merge(gt_data, oba_data)
 
     # Save merged data to csv
@@ -91,7 +96,7 @@ def main():
     merged_data_frame.to_csv(path_or_buf=merged_file_path, index=False)
 
 
-def preprocessObaData(data_csv):
+def preprocess_oba_data(data_csv) -> object:
     """ Preprocess the csv data file from oba-firebase-export as follows:
         - Change activity start date datatype from str to datetime
         - Drop observations whose activity start date are NaN after data type conversion
@@ -123,14 +128,11 @@ def preprocessObaData(data_csv):
     data_csv_dropped = pd.merge(data_csv, clean_data_csv, how='outer', indicator=True).query("_merge != 'both'").drop(
         '_merge', axis=1).reset_index(drop=True)
 
-    # Save data to be dropped to a csv file
-    dropped_file_path = os.path.join(command_line_args.dataDir, "logs", "droppedObaData.csv")
-    data_csv_dropped.to_csv(path_or_buf=dropped_file_path, index=False)
-
-    return clean_data_csv
+    # Return clean data and dropped data as separated dataframes
+    return clean_data_csv, data_csv_dropped
 
 
-def preprocessGtData(gt_data):
+def preprocess_gt_data(gt_data):
     """ Preprocess the ground Truth xlsx data file as follows:
         - Remove unnamed columns if exist
         - Change the column to datetime.time
