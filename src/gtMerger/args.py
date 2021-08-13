@@ -18,6 +18,7 @@
 
 # Import dependencies
 import argparse
+import constants
 
 
 def get_parser():
@@ -28,18 +29,18 @@ def get_parser():
 
     parser.add_argument('--gtFile', type=str, required=True, help='Path to XLSX file including the Ground Truth data')
 
-    parser.add_argument('--dataDir', type=str, default='data',
-                        help='Folder including the sub-folder related to each GT Data files')
+    parser.add_argument('--dataDir', type=str, default=constants.DATA_DIR,
+                        help='Folder used to save output and log data from preprocess and merge')
 
-    parser.add_argument('--minActivityDuration', type=float, default=5,
+    parser.add_argument('--minActivityDuration', type=float, default=constants.MIN_ACTIVITY_DURATION,
                         help='Minimum activity time span (minutes, default value = 5), shorter activities will be '
                              'dropped before merging.')
 
-    parser.add_argument('--minTripLength', type=int, default=50,
+    parser.add_argument('--minTripLength', type=int, default=constants.MIN_TRIP_LENGTH,
                         help='Minimum length distance (meters, default value 50) for a trip. Shorter trips will be '
                              'dropped before merging')
 
-    parser.add_argument('--tolerance', type=int, default=3000,
+    parser.add_argument('--tolerance', type=int, default=constants.TOLERANCE,
                         help='Maximum tolerated difference (milliseconds, default value 3000) between matched ground '
                              'truth data activity and OBA data activity')
 
