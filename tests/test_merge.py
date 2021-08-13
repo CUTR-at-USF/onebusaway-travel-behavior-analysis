@@ -21,6 +21,10 @@ import pandas as pd
 
 from src.gtMerger import preprocess, constants
 
+import sys, os
+myPath = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, myPath + '/../')
+
 
 class MergeTest(unittest.TestCase):
     """
