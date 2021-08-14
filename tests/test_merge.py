@@ -33,7 +33,7 @@ class MergeTest(unittest.TestCase):
         self.oba_df = pd.read_csv(oba_file_path)
         self.clean_oba_df, _ = preprocess.preprocess_oba_data(self.oba_df, 5, 50)
         gt_file_path = os.path.join(os.path.dirname(__file__), 'data_test/GT_test.xlsx')
-        self.gt_df = pd.read_excel(gt_file_path)
+        self.gt_df = pd.read_excel(gt_file_path, engine='openpyxl')
         self.clean_gt_df, _ = preprocess.preprocess_gt_data(self.gt_df)
         pass
 
