@@ -19,7 +19,7 @@
 import unittest
 import pandas as pd
 
-from src.gtMerger import preprocess, constants
+from src.gt_merger import preprocess, constants
 
 
 class MergeTest(unittest.TestCase):

@@ -20,7 +20,7 @@ import datetime
 import pandas as pd
 import pytz
 
-from src.gtMerger import constants
+from src.gt_merger import constants
 
 
 def preprocess_oba_data(data_csv, min_activity_duration, min_trip_length) -> object:
