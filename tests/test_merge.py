@@ -15,7 +15,7 @@
  * limitations under the License.
  */
  """
-
+import os
 import unittest
 import pandas as pd
 
@@ -29,9 +29,11 @@ class MergeTest(unittest.TestCase):
 
     def setUp(self):
         """ Load dataframes used to perform tests. """
-        self.oba_df = pd.read_csv("data_test/travel-behavior-test.csv")
+        oba_file_path = os.path.join(os.path.dirname(__file__), 'data_test/travel-behavior-test.csv')
+        self.oba_df = pd.read_csv(oba_file_path)
         self.clean_oba_df, _ = preprocess.preprocess_oba_data(self.oba_df, 5, 50)
-        self.gt_df = pd.read_excel("data_test/GT_test.xlsx")
+        gt_file_path = os.path.join(os.path.dirname(__file__), 'data_test/GT_test.xlsx')
+        self.gt_df = pd.read_excel(gt_file_path)
         self.clean_gt_df, _ = preprocess.preprocess_gt_data(self.gt_df)
         pass
 
