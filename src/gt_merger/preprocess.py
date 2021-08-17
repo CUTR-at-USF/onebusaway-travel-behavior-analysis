@@ -47,8 +47,8 @@ def preprocess_oba_data(data_csv, min_activity_duration, min_trip_length) -> obj
     clean_data_csv = data_csv.dropna(
         subset=constants.OBA_RELEVANT_COLS_LIST)
 
-    # Remove trips with Duration less than command_line_args.minActivityDuration minutes and distance less than
-    # command_line_args.minTripLength
+    # Keep only trips with Duration greater or equal than command_line_args.minActivityDuration minutes and distance
+    # greater of equal than command_line_args.minTripLength
     clean_data_csv = clean_data_csv[(data_csv['Duration* (minutes)'] >= min_activity_duration) & (
             data_csv['Origin-Destination Bird-Eye Distance* (meters)'] >= min_trip_length)]
 
@@ -80,13 +80,13 @@ def preprocess_gt_data(gt_data):
     unnamed_cols = [col for col in gt_data.columns if 'Unnamed' in col]
     gt_data = gt_data.drop(unnamed_cols, axis=1)
 
-    # Change data type of TimeOrig to string to simplify date time conversions
+    # Change data type of TimeOrig to string to make possible date-time casting
     gt_data.GT_TimeOrig = gt_data.GT_TimeOrig.astype(str)
 
-    # Change the column to datetime.time, coerce will produce NaN if the change is not possible
+    # Change the column to datetime.time, coerce will produce NaT if the change is not possible
     gt_data['GT_TimeOrig'] = pd.to_datetime(gt_data['GT_TimeOrig'], errors='coerce').dt.time
 
-    # Drop rows with NaN on GT_Date or GT_TimeOrig
+    # Drop rows with NaT on GT_Date or GT_TimeOrig
     clean_gt_data = gt_data.dropna(subset=['GT_Date', 'GT_TimeOrig'])
 
     # Add the data to be dropped to a data frame

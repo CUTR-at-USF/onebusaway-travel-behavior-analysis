@@ -41,23 +41,31 @@ class MergeTest(unittest.TestCase):
         """ Clean up test suite - no-op. """
         pass
 
-    def test_no_nan(self):
+    def test_oba_no_nan(self):
         """ Test preprocess OBA has not NaN on relevant columns """
         self.assertEqual(0, self.clean_oba_df[constants.OBA_RELEVANT_COLS_LIST].isna().any().sum())
-        pd._testing.assert_frame_equal(self.gt_df, self.gt_df)
 
-    def test_datetime_type_column(self):
-        """ Test Activity Start date and Time column was converted to datetime"""
+    def test_oba_datetime_type_column(self):
+        """ Test Activity Start date and Time column were converted to datetime"""
         self.assertTrue(pd.api.types.is_datetime64_any_dtype(self.clean_oba_df['Activity Start Date and Time* (UTC)']))
 
-    def test_no_activities_duration_shorter_than_required(self):
+    def test_oba_no_activities_duration_shorter_than_required(self):
         """ Test that duration of each of all activities is no shorter than required"""
         self.assertEqual(0, (self.clean_oba_df['Duration* (minutes)'] < constants.MIN_ACTIVITY_DURATION).sum())
 
-    def test_no_activities_length_shorter_than_required(self):
+    def test_oba_no_activities_length_shorter_than_required(self):
         """ Test that length of each of all activities is no shorter than required"""
         self.assertEqual(0, (self.clean_oba_df['Origin-Destination Bird-Eye Distance* (meters)'] <
                          constants.MIN_TRIP_LENGTH).sum())
+
+    def test_gt_no_unnamed_cols(self):
+        """ Test that unnamed columns were removed"""
+        unnamed_cols = [col for col in self.clean_gt_df.columns if 'Unnamed' in col]
+        self.assertFalse(unnamed_cols)
+
+    def test_gt_datetime_type_column(self):
+        """ Test that 'ClosestTime' was converted to datetime, this column is used for merging"""
+        self.assertTrue(pd.api.types.is_datetime64_any_dtype(self.clean_gt_df['ClosestTime']))
 
 
 if __name__ == '__main__':
