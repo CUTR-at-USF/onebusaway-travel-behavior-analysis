@@ -95,18 +95,20 @@ def main():
     data_csv_dropped.to_csv(path_or_buf=dropped_file_path, index=False)
 
     # merge dataframes
-    merged_data_frame = merge(gt_data, oba_data)
+    merged_data_frame = merge(gt_data, oba_data, command_line_args.tolerance)
 
     # Save merged data to csv
     merged_file_path = os.path.join(command_line_args.dataDir, constants.FOLDER_OUTPUT, constants.MERGED_DATA_FILE_NAME)
     merged_data_frame.to_csv(path_or_buf=merged_file_path, index=False)
 
 
-def merge(gt_data, oba_data):
+def merge(gt_data, oba_data, tolerance):
     """
     Merge gt_data dataframe and oba_data dataframe using the nearest value between columns 'gt_data.ClosestTime' and
     'oba_data.Activity Start Date and Time* (UTC)'. Before merging, the data is grouped by 'GT_Collector' on gt_data and
     each row on gt_data will be paired with one or none of the rows on oba_data grouped by userId.
+    :param tolerance: maximum allowed difference (seconds) between 'gt_data.ClosestTime' and
+    'oba_data.Activity Start Date and Time* (UTC)'.
     :param gt_data: dataframe with preprocessed data from ground truth XLSX data file
     :param oba_data: dataframe with preprocessed data from OBA firebase export CSV data file
     :return: dataframe with the merged data.
@@ -131,7 +133,7 @@ def merge(gt_data, oba_data):
             temp_merge = pd.merge_asof(gt_data_collector, oba_data_user, left_on="ClosestTime",
                                        right_on="Activity Start Date and Time* (UTC)",
                                        direction="nearest",
-                                       tolerance=pd.Timedelta(str(command_line_args.tolerance) + "ms"))
+                                       tolerance=pd.Timedelta(str(tolerance) + "ms"))
             merged_df = pd.concat([merged_df, temp_merge], ignore_index=True)
     return merged_df
 
