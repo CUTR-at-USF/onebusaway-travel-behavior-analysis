@@ -22,7 +22,7 @@ import pandas as pd
 from src.gt_merger import preprocess, constants
 
 
-class MergeTest(unittest.TestCase):
+class PreprocessTest(unittest.TestCase):
     """
     Merge dataframes by closest activity start time test class.
     """
