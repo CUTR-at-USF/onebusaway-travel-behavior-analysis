@@ -49,8 +49,8 @@ def preprocess_oba_data(data_csv, min_activity_duration, min_trip_length) -> obj
 
     # Keep only trips with Duration greater or equal than command_line_args.minActivityDuration minutes and distance
     # greater of equal than command_line_args.minTripLength
-    clean_data_csv = clean_data_csv[(data_csv['Duration* (minutes)'] >= min_activity_duration) & (
-            data_csv['Origin-Destination Bird-Eye Distance* (meters)'] >= min_trip_length)]
+    clean_data_csv = clean_data_csv[(clean_data_csv['Duration* (minutes)'] >= min_activity_duration) & (
+            clean_data_csv['Origin-Destination Bird-Eye Distance* (meters)'] >= min_trip_length)]
 
     # Add the data to be dropped to a data frame
     data_csv_dropped = pd.merge(data_csv, clean_data_csv, how='outer', indicator=True).query("_merge != 'both'").drop(
