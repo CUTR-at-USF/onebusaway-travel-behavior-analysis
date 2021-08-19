@@ -20,9 +20,9 @@ DATA_DIR = 'data'
 # Default minimum activity duration (minutes)
 MIN_ACTIVITY_DURATION = 5
 # Default minimum distance (meters) for a trip.
-MIN_TRIP_LENGTH = 50
+MIN_TRIP_LENGTH = 25
 # Default maximum tolerated difference (milliseconds) between matched ground truth data activity and OBA data activity'
-TOLERANCE = 3000
+TOLERANCE = 5000
 
 # Folders to save logs an outputs
 FOLDER_LOGS = 'logs'
