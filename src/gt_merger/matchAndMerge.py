@@ -22,9 +22,9 @@ from pathlib import Path
 import pandas as pd
 
 # Import dependencies
-from args import get_parser
-from preprocess import preprocess_gt_data, preprocess_oba_data
-import constants
+from src.gt_merger import constants
+from src.gt_merger.args import get_parser
+from src.gt_merger.preprocess import preprocess_gt_data, preprocess_oba_data
 
 
 # -------------------------------------------
