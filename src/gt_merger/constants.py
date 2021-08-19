@@ -16,7 +16,7 @@
  */
  """
 # Folder used to save output and log data from preprocess and merge
-DATA_DIR = 'data'
+OUTPUT_DIR = 'merger_output'
 # Default minimum activity duration (minutes)
 MIN_ACTIVITY_DURATION = 5
 # Default minimum distance (meters) for a trip.
@@ -24,9 +24,9 @@ MIN_TRIP_LENGTH = 25
 # Default maximum tolerated difference (milliseconds) between matched ground truth data activity and OBA data activity'
 TOLERANCE = 5000
 
-# Folders to save logs an outputs
+# Folders to save logs an merged data
 FOLDER_LOGS = 'logs'
-FOLDER_OUTPUT = 'output'
+FOLDER_MERGED_DATA = 'merged_data'
 
 # File names for logs and output
 GT_DROPPED_DATA_FILE_NAME = "droppedGtData.csv"

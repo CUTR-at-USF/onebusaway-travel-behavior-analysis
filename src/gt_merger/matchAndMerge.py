@@ -41,16 +41,17 @@ def main():
         exit()
 
     # Verify if the data folder exists
-    if not os.path.isdir(command_line_args.dataDir):
-        print("Data folder not found, trying to create it in the current working directory:", command_line_args.dataDir)
+    if not os.path.isdir(command_line_args.outputDir):
+        print("Data folder not found, trying to create it in the current working directory:",
+              command_line_args.outputDir)
         try:
-            os.makedirs(command_line_args.dataDir, exist_ok=True)
+            os.makedirs(command_line_args.outputDir, exist_ok=True)
         except OSError:
-            print("There was an error while creating the data folder:", command_line_args.dataDir)
+            print("There was an error while creating the data folder:", command_line_args.outputDir)
             exit()
 
     # Create sub-folders for output an logs
-    path_logs = os.path.join(command_line_args.dataDir, constants.FOLDER_LOGS)
+    path_logs = os.path.join(command_line_args.outputDir, constants.FOLDER_LOGS)
     if not os.path.isdir(path_logs):
         try:
             os.mkdir(path_logs)
@@ -58,7 +59,7 @@ def main():
             print("There was an error while creating the sub folder for logs:", path_logs)
             exit()
 
-    path_output = os.path.join(command_line_args.dataDir, constants.FOLDER_OUTPUT)
+    path_output = os.path.join(command_line_args.outputDir, constants.FOLDER_MERGED_DATA)
     if not os.path.isdir(path_output):
         try:
             os.mkdir(path_output)
@@ -75,7 +76,7 @@ def main():
     gt_data, data_gt_dropped = preprocess_gt_data(gt_data)
     print("Ground truth data preprocessed.")
     # Save data to be dropped to a csv file
-    dropped_file_path = os.path.join(command_line_args.dataDir, constants.FOLDER_LOGS,
+    dropped_file_path = os.path.join(command_line_args.outputDir, constants.FOLDER_LOGS,
                                      constants.GT_DROPPED_DATA_FILE_NAME)
     data_gt_dropped.to_csv(path_or_buf=dropped_file_path, index=False)
 
@@ -90,7 +91,7 @@ def main():
 
     # Data preprocessing is over
     # Save oba dropped data to a csv file
-    dropped_file_path = os.path.join(command_line_args.dataDir, constants.FOLDER_LOGS,
+    dropped_file_path = os.path.join(command_line_args.outputDir, constants.FOLDER_LOGS,
                                      constants.OBA_DROPPED_DATA_FILE_NAME)
     data_csv_dropped.to_csv(path_or_buf=dropped_file_path, index=False)
 
@@ -98,7 +99,7 @@ def main():
     merged_data_frame = merge(gt_data, oba_data, command_line_args.tolerance)
 
     # Save merged data to csv
-    merged_file_path = os.path.join(command_line_args.dataDir, constants.FOLDER_OUTPUT, constants.MERGED_DATA_FILE_NAME)
+    merged_file_path = os.path.join(command_line_args.outputDir, constants.FOLDER_MERGED_DATA, constants.MERGED_DATA_FILE_NAME)
     merged_data_frame.to_csv(path_or_buf=merged_file_path, index=False)
 
 
