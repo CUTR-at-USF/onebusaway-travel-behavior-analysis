@@ -36,7 +36,7 @@ The csv file must include the following columns:
 
 ### Additional Optional Command Line Arguments 
 * `--outputDir <data folder>` Takes a string with the name of the folder where the merged data and log files will be stored. If the folder does not exist, the application will try to create it. The default values is `merger_output`. Example usage:
-`--outputDir outputData` will look for the folder `outputData` in the current working directory.
+`--outputDir outputData` will look for the folder `outputData`.
 * `--minActivityDuration <minutes>` Minimum activity time span (in minutes), shorter activities will be dropped before merging. The default values is 5 minutes. For example `--minActivityDuration 3` will remove, from the oba generated data, activities whose duration is less than 3 minutes.
 * `--minTripLength <meters>` Minimum distance (in meters) for a trip. Shorter trips will be dropped before merging. The default values is 50 meters. Example usage:
 `--minTripLength 60` will remove, from the oba generated data, activities whose `Origin-Destination Bird-Eye Distance* (meters)` is less than 60 meters.
