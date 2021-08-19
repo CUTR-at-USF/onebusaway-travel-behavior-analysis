@@ -18,7 +18,7 @@
 
 # Import dependencies
 import argparse
-import constants
+from src.gt_merger import constants
 
 
 def get_parser():
@@ -33,16 +33,17 @@ def get_parser():
                         help='Folder used to save output and log data from preprocess and merge')
 
     parser.add_argument('--minActivityDuration', type=float, default=constants.MIN_ACTIVITY_DURATION,
-                        help='Minimum activity time span (minutes, default value = 5), shorter activities will be '
-                             'dropped before merging.')
+                        help='Minimum activity time span (minutes, default value = ' +
+                             str(constants.MIN_ACTIVITY_DURATION) +
+                             '), shorter activities will be dropped before merging.')
 
     parser.add_argument('--minTripLength', type=int, default=constants.MIN_TRIP_LENGTH,
-                        help='Minimum length distance (meters, default value 50) for a trip. Shorter trips will be '
-                             'dropped before merging')
+                        help='Minimum length distance (meters, default value ' + str(constants.MIN_TRIP_LENGTH) +
+                             ') for a trip. Shorter trips will be dropped before merging')
 
     parser.add_argument('--tolerance', type=int, default=constants.TOLERANCE,
-                        help='Maximum tolerated difference (milliseconds, default value 3000) between matched ground '
-                             'truth data activity and OBA data activity')
+                        help='Maximum tolerated difference (milliseconds, default value ' + str(constants.TOLERANCE) +
+                             ') between matched ground truth data activity and OBA data activity')
 
     args = parser.parse_args()
 
