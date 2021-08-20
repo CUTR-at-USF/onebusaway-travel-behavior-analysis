@@ -30,7 +30,7 @@ def get_parser():
     parser.add_argument('--gtFile', type=str, required=True, help='Path to XLSX file including the Ground Truth data')
 
     parser.add_argument('--outputDir', type=str, default=constants.OUTPUT_DIR,
-                        help='Path to folder directory used to save merged and log data generated after merge')
+                        help='Path to directory where the merged data and log data will be output')
 
     parser.add_argument('--minActivityDuration', type=float, default=constants.MIN_ACTIVITY_DURATION,
                         help='Minimum activity time span (minutes, default value = ' +
