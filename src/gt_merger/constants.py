@@ -36,3 +36,4 @@ MERGED_DATA_FILE_NAME = "mergedData.csv"
 # List of columns where NaN values are not allowed
 OBA_RELEVANT_COLS_LIST = ['Activity Start Date and Time* (UTC)', 'Origin location Date and Time (*best) (UTC)',
                           'Duration* (minutes)', 'Origin-Destination Bird-Eye Distance* (meters)']
+GT_RELEVANT_COLS_LIST = ['GT_Date', 'GT_TimeOrig']

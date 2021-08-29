@@ -24,7 +24,8 @@ import pandas as pd
 # Import dependencies
 from src.gt_merger import constants
 from src.gt_merger.args import get_parser
-from src.gt_merger.preprocess import preprocess_gt_data, preprocess_oba_data
+from src.gt_merger.preprocess import preprocess_gt_data, preprocess_oba_data, is_valid_oba_dataframe, \
+    is_valid_gt_dataframe
 
 
 # -------------------------------------------
@@ -71,6 +72,10 @@ def main():
     excel_path = Path(command_line_args.gtFile)
     # Load ground truth data to a dataframe
     gt_data = pd.read_excel(excel_path)
+    # Validate gt dataframe
+    if not is_valid_gt_dataframe(gt_data):
+        print("Ground truth data frame is empty or do not have the required columns.")
+        exit()
 
     # Preprocess ground truth data
     gt_data, data_gt_dropped = preprocess_gt_data(gt_data)
@@ -84,6 +89,11 @@ def main():
     csv_path = Path(command_line_args.obaFile)
     # Load OBA data
     oba_data = pd.read_csv(csv_path)
+    # Validate oba dataframe
+    if not is_valid_oba_dataframe(oba_data):
+        print("OBA data frame is empty or do not have the required columns.")
+        exit()
+
     # Preprocess OBA data
     oba_data, data_csv_dropped = preprocess_oba_data(oba_data, command_line_args.minActivityDuration,
                                                      command_line_args.minTripLength)
