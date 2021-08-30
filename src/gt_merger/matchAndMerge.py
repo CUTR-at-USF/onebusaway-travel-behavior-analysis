@@ -74,7 +74,7 @@ def main():
     gt_data = pd.read_excel(excel_path)
     # Validate gt dataframe
     if not is_valid_gt_dataframe(gt_data):
-        print("Ground truth data frame is empty or do not have the required columns.")
+        print("Ground truth data frame is empty or does not have the required columns.")
         exit()
 
     # Preprocess ground truth data
@@ -91,7 +91,7 @@ def main():
     oba_data = pd.read_csv(csv_path)
     # Validate oba dataframe
     if not is_valid_oba_dataframe(oba_data):
-        print("OBA data frame is empty or do not have the required columns.")
+        print("OBA data frame is empty or does not have the required columns.")
         exit()
 
     # Preprocess OBA data
