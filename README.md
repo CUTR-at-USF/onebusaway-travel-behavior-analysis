@@ -1,4 +1,4 @@
-# onebusaway-travel-behavior-analysis
+# onebusaway-travel-behavior-analysis [![Python application](https://github.com/CUTR-at-USF/onebusaway-travel-behavior-analysis/actions/workflows/python-app.yml/badge.svg)](https://github.com/CUTR-at-USF/onebusaway-travel-behavior-analysis/actions/workflows/python-app.yml)
 Python utilities to process and analyze travel behavior data collected by OneBusAway and exported as csv file by oba-firebase-export.
 
 ### matchAndMerge utility
