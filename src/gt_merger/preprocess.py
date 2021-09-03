@@ -23,6 +23,38 @@ import pytz
 from src.gt_merger import constants
 
 
+def is_valid_oba_dataframe(df_csv):
+    """
+    Validate if the oba dataframe is not empty and includes the required columns to perform the preprocess
+    :param df_csv: Dataframe loaded from the oba exported csv file
+    :return: True if df_csv is not empty and includes the required columns, False otherwise
+    """
+    # Validate df is not empty
+    if df_csv.empty:
+        return False
+    # Validate existence of relevant columns
+    if not set(constants.OBA_RELEVANT_COLS_LIST).issubset(df_csv.columns):
+        return False
+
+    return True
+
+
+def is_valid_gt_dataframe(df_gt):
+    """
+    Validate if the ground truth dataframe is not empty and includes the required columns to perform the preprocess
+    :param df_gt: Dataframe loaded from the ground truth data file
+    :return: True if gt_csv is not empty and includes the required columns, False otherwise
+    """
+    # Validate df is not empty
+    if df_gt.empty:
+        return False
+    # Validate existence of relevant columns
+    if not set(constants.GT_RELEVANT_COLS_LIST).issubset(df_gt.columns):
+        return False
+
+    return True
+
+
 def preprocess_oba_data(data_csv, min_activity_duration, min_trip_length) -> object:
     """ Preprocess the csv data file from oba-firebase-export as follows:
         - Change activity start date datatype from str to datetime
@@ -63,7 +95,7 @@ def preprocess_oba_data(data_csv, min_activity_duration, min_trip_length) -> obj
 def preprocess_gt_data(gt_data):
     """ Preprocess the ground Truth xlsx data file as follows:
         - Remove unnamed columns if exist
-        - Change the column to datetime.time
+        - Change the GT_TimeOrig column to datetime.time
         - Drop rows with NaN on GT_Date or GT_TimeOrig  after data type conversion
         - Create GT_DateTimeCombined column joining GT_Date and GT_TimeOrig columns
         - Assign timezone to GT_DateTimeCombined
@@ -83,11 +115,11 @@ def preprocess_gt_data(gt_data):
     # Change data type of TimeOrig to string to make possible date-time casting
     gt_data.GT_TimeOrig = gt_data.GT_TimeOrig.astype(str)
 
-    # Change the column to datetime.time, coerce will produce NaT if the change is not possible
+    # Change the GT_TimeOrig column to datetime.time, coerce will produce NaT if the change is not possible
     gt_data['GT_TimeOrig'] = pd.to_datetime(gt_data['GT_TimeOrig'], errors='coerce').dt.time
 
     # Drop rows with NaT on GT_Date or GT_TimeOrig
-    clean_gt_data = gt_data.dropna(subset=['GT_Date', 'GT_TimeOrig'])
+    clean_gt_data = gt_data.dropna(subset=constants.GT_RELEVANT_COLS_LIST)
 
     # Add the data to be dropped to a data frame
     data_gt_dropped = pd.merge(gt_data, clean_gt_data, how='outer', indicator=True).query("_merge != 'both'").drop(
@@ -102,5 +134,5 @@ def preprocess_gt_data(gt_data):
         lambda x: pytz.timezone(x.GT_TimeZone).localize(x.GT_DateTimeCombined), 1)
 
     # Add column to be used in function "merge_asoft"
-    clean_gt_data['ClosestTime'] = clean_gt_data['GT_DateTimeCombined'].dt.tz_convert('UTC')
+    clean_gt_data.loc[:, 'ClosestTime'] = clean_gt_data['GT_DateTimeCombined'].dt.tz_convert('UTC')
     return clean_gt_data, data_gt_dropped
