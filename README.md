@@ -43,6 +43,10 @@ The csv file must include the following columns:
 * `--tolerance <milliseconds>` Maximum tolerated difference (milliseconds) between matched ground truth data start activity and OBA data start activity. 
 By default, it is 3000 milliseconds. Example usage: `--tolerance 5000` will consider only a difference equal or less than 5000 milliseconds while looking for a match between a ground truth data start activity and a OBA data start activity.
 
+### Acknowledgements
+
+This project was funded under the [National Institute for Congestion Reduction (NICR)](https://nicr.usf.edu/2020/12/11/3-1-influencing-travel-behavior-via-open-source-platform/).
+
 ### License
 
 ```
