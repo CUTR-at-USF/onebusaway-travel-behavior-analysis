@@ -19,9 +19,12 @@
 import os
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 # Import dependencies
+from matplotlib import pyplot as plt
+
 from src.gt_merger import constants
 from src.gt_merger.args import get_parser
 from src.gt_merger.preprocess import preprocess_gt_data, preprocess_oba_data, is_valid_oba_dataframe, \
@@ -108,6 +111,20 @@ def main():
     # merge dataframes
     merged_data_frame = merge(gt_data, oba_data, command_line_args.tolerance)
 
+    # Calculate difference
+    merged_data_frame.loc[:, 'Time_Difference'] = merged_data_frame.apply(
+        lambda x: (x['ClosestTime']-x['Activity Start Date and Time* (UTC)']) / np.timedelta64(1, 's'), 1)
+
+    df_time_diff = merged_data_frame.loc[:, ['Time_Difference']]
+    df_time_diff = df_time_diff.dropna()
+    print(df_time_diff.shape)
+    boxplot = df_time_diff.boxplot(column=['Time_Difference'])
+    path_figure = os.path.join(command_line_args.outputDir, constants.FOLDER_MERGED_DATA, "boxplot.png")
+    plt.savefig(path_figure, format='png')
+    plt.show()
+
+    print(merged_data_frame.info())
+
     # Save merged data to csv
     merged_file_path = os.path.join(command_line_args.outputDir, constants.FOLDER_MERGED_DATA, constants.MERGED_DATA_FILE_NAME)
     merged_data_frame.to_csv(path_or_buf=merged_file_path, index=False)
@@ -135,7 +152,6 @@ def merge(gt_data, oba_data, tolerance):
         # Make sure dataframe is sorted by 'ClosesTime'
         gt_data_collector.sort_values('ClosestTime', inplace=True)
         for oba_user in list_oba_users:
-            print("\t Oba user", oba_user[-4:])
             # Create a dataframe with the oba_user activities only
             oba_data_user = oba_data[oba_data["User ID"] == oba_user]
             # Make sure dataframes is sorted by 'Activity Start Date and Time* (UTC)'
@@ -146,6 +162,10 @@ def merge(gt_data, oba_data, tolerance):
                                        direction="nearest",
                                        tolerance=pd.Timedelta(str(tolerance) + "ms"))
             merged_df = pd.concat([merged_df, temp_merge], ignore_index=True)
+            # Print number of matches
+            print("\t Oba user", oba_user[-4:], "\tMatches: ", (temp_merge["User ID"] == oba_user).sum(), " out of ",
+                  (temp_merge["GT_Collector"] == collector).sum())
+
     return merged_df
 
 
