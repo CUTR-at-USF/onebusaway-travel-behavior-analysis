@@ -15,7 +15,7 @@
  * limitations under the License.
  */
  """
-
+from datetime import datetime
 import os
 from pathlib import Path
 
@@ -113,7 +113,7 @@ def main():
 
     # Calculate difference
     merged_data_frame.loc[:, 'Time_Difference'] = merged_data_frame.apply(
-        lambda x: (x['ClosestTime']-x['Activity Start Date and Time* (UTC)']) / np.timedelta64(1, 's'), 1)
+        lambda x: (x['ClosestTime'] - x['Activity Start Date and Time* (UTC)']) / np.timedelta64(1, 's'), 1)
 
     df_time_diff = merged_data_frame.loc[:, ['Time_Difference']]
     df_time_diff = df_time_diff.dropna()
@@ -123,10 +123,12 @@ def main():
     plt.savefig(path_figure, format='png')
     plt.show()
 
-    print(merged_data_frame.info())
-
+    now = datetime.now()  # current date and time
+    date_time = now.strftime("%y%m%d_%H%M")
     # Save merged data to csv
-    merged_file_path = os.path.join(command_line_args.outputDir, constants.FOLDER_MERGED_DATA, constants.MERGED_DATA_FILE_NAME)
+    merged_file_path = os.path.join(command_line_args.outputDir, constants.FOLDER_MERGED_DATA,
+                                    constants.MERGED_DATA_FILE_NAME + "_" + date_time + "_" +
+                                    str(command_line_args.tolerance) + ".csv")
     merged_data_frame.to_csv(path_or_buf=merged_file_path, index=False)
 
 
@@ -160,7 +162,8 @@ def merge(gt_data, oba_data, tolerance):
             temp_merge = pd.merge_asof(gt_data_collector, oba_data_user, left_on="ClosestTime",
                                        right_on="Activity Start Date and Time* (UTC)",
                                        direction="nearest",
-                                       tolerance=pd.Timedelta(str(tolerance) + "ms"))
+                                       tolerance=pd.Timedelta(str(tolerance) + "ms"), left_by='GT_Mode',
+                                       right_by='Google Activity')
             merged_df = pd.concat([merged_df, temp_merge], ignore_index=True)
             # Print number of matches
             print("\t Oba user", oba_user[-4:], "\tMatches: ", (temp_merge["User ID"] == oba_user).sum(), " out of ",

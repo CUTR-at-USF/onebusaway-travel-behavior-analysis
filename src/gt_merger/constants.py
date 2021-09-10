@@ -31,7 +31,7 @@ FOLDER_MERGED_DATA = 'merged_data'
 # File names for logs and output
 GT_DROPPED_DATA_FILE_NAME = "droppedGtData.csv"
 OBA_DROPPED_DATA_FILE_NAME = "droppedObaData.csv"
-MERGED_DATA_FILE_NAME = "mergedData.csv"
+MERGED_DATA_FILE_NAME = "mergedData"
 
 # List of columns where NaN values are not allowed
 OBA_RELEVANT_COLS_LIST = ['Activity Start Date and Time* (UTC)', 'Origin location Date and Time (*best) (UTC)',
