@@ -22,7 +22,7 @@ MIN_ACTIVITY_DURATION = 2
 # Default minimum distance (meters) for a trip.
 MIN_TRIP_LENGTH = 20
 # Default maximum tolerated difference (milliseconds) between matched ground truth data activity and OBA data activity'
-TOLERANCE = 300000
+TOLERANCE = 3600000
 
 # Folders to save logs an merged data
 FOLDER_LOGS = 'logs'

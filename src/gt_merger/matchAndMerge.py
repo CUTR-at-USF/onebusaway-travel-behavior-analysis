@@ -24,6 +24,7 @@ import pandas as pd
 
 # Import dependencies
 from matplotlib import pyplot as plt
+from collections import defaultdict
 
 from src.gt_merger import constants
 from src.gt_merger.args import get_parser
@@ -109,7 +110,7 @@ def main():
     data_csv_dropped.to_csv(path_or_buf=dropped_file_path, index=False)
 
     # merge dataframes
-    merged_data_frame = merge(gt_data, oba_data, command_line_args.tolerance)
+    merged_data_frame, num_matches_df = merge(gt_data, oba_data, command_line_args.tolerance)
 
     # Calculate difference
     merged_data_frame.loc[:, 'Time_Difference'] = merged_data_frame.apply(
@@ -118,10 +119,10 @@ def main():
     df_time_diff = merged_data_frame.loc[:, ['Time_Difference']]
     df_time_diff = df_time_diff.dropna()
     print(df_time_diff.shape)
-    boxplot = df_time_diff.boxplot(column=['Time_Difference'])
-    path_figure = os.path.join(command_line_args.outputDir, constants.FOLDER_MERGED_DATA, "boxplot.png")
-    plt.savefig(path_figure, format='png')
-    plt.show()
+    # boxplot = df_time_diff.boxplot(column=['Time_Difference'])
+    # path_figure = os.path.join(command_line_args.outputDir, constants.FOLDER_MERGED_DATA, "boxplot.png")
+    # plt.savefig(path_figure, format='png')
+    # plt.show()
 
     now = datetime.now()  # current date and time
     date_time = now.strftime("%y%m%d_%H%M")
@@ -129,7 +130,11 @@ def main():
     merged_file_path = os.path.join(command_line_args.outputDir, constants.FOLDER_MERGED_DATA,
                                     constants.MERGED_DATA_FILE_NAME + "_" + date_time + "_" +
                                     str(command_line_args.tolerance) + ".csv")
+    num_matches_file_path = os.path.join(command_line_args.outputDir, constants.FOLDER_MERGED_DATA,
+                                    "num_matches" + "_" + date_time + "_" +
+                                    str(command_line_args.tolerance) + ".csv")
     merged_data_frame.to_csv(path_or_buf=merged_file_path, index=False)
+    num_matches_df.to_csv(path_or_buf=num_matches_file_path, index=False)
 
 
 def merge(gt_data, oba_data, tolerance):
@@ -145,14 +150,21 @@ def merge(gt_data, oba_data, tolerance):
     """
     list_collectors = gt_data['GT_Collector'].unique()
     list_oba_users = oba_data['User ID'].unique()
-
     merged_df = pd.DataFrame()
+    matches_df = pd.DataFrame(list_collectors, columns=['GT_Collector'])
+    list_total_trips = []
+    list_matches = []
+    matches_dict = defaultdict(list)
     for collector in list_collectors:
         print("Merging data for collector ", collector)
         # Create dataframe for a collector on list_collectors
         gt_data_collector = gt_data[gt_data["GT_Collector"] == collector]
         # Make sure dataframe is sorted by 'ClosesTime'
         gt_data_collector.sort_values('ClosestTime', inplace=True)
+        # Add total trips per collector
+        list_total_trips.append(len(gt_data_collector))
+        i = 0
+        list_matches_by_phone = []
         for oba_user in list_oba_users:
             # Create a dataframe with the oba_user activities only
             oba_data_user = oba_data[oba_data["User ID"] == oba_user]
@@ -168,8 +180,17 @@ def merge(gt_data, oba_data, tolerance):
             # Print number of matches
             print("\t Oba user", oba_user[-4:], "\tMatches: ", (temp_merge["User ID"] == oba_user).sum(), " out of ",
                   (temp_merge["GT_Collector"] == collector).sum())
-
-    return merged_df
+            #matches_df[(matches_df["GT_Collector"] == collector)][oba_user] = (temp_merge["User ID"] == oba_user).sum()
+            list_matches_by_phone.append((temp_merge["User ID"] == oba_user).sum())
+            matches_dict[oba_user[-4:]].append((temp_merge["User ID"] == oba_user).sum())
+            i += 1
+        list_matches.append(list_matches_by_phone)
+    matches_df['total_trips'] = list_total_trips
+    numbers_df = pd.DataFrame.from_dict(matches_dict)
+    matches_df = pd.concat([matches_df, numbers_df], axis=1)
+    print("matches", matches_df.head())
+    print("List of matches", list_matches)
+    return merged_df, matches_df
 
 
 if __name__ == '__main__':
