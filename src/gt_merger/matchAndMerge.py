@@ -25,6 +25,8 @@ import pandas as pd
 # Import dependencies
 from matplotlib import pyplot as plt
 from collections import defaultdict
+import haversine as hs
+from haversine import Unit
 
 from src.gt_merger import constants
 from src.gt_merger.args import get_parser
@@ -83,6 +85,8 @@ def main():
 
     # Preprocess ground truth data
     gt_data, data_gt_dropped = preprocess_gt_data(gt_data)
+    # Drop records with still mode
+    gt_data = gt_data[gt_data.GT_Mode != 'STILL']
     print("Ground truth data preprocessed.")
     # Save data to be dropped to a csv file
     dropped_file_path = os.path.join(command_line_args.outputDir, constants.FOLDER_LOGS,
@@ -109,32 +113,45 @@ def main():
                                      constants.OBA_DROPPED_DATA_FILE_NAME)
     data_csv_dropped.to_csv(path_or_buf=dropped_file_path, index=False)
 
-    # merge dataframes
-    merged_data_frame, num_matches_df = merge(gt_data, oba_data, command_line_args.tolerance)
+    if command_line_args.iterateOverTol:
+        first_tol = 30000
+        save_to_path = os.path.join(constants.FOLDER_MERGED_DATA, "batch")
+    else:
+        save_to_path = os.path.join(constants.FOLDER_MERGED_DATA)
+        first_tol = constants.TOLERANCE
 
-    # Calculate difference
-    merged_data_frame.loc[:, 'Time_Difference'] = merged_data_frame.apply(
-        lambda x: (x['ClosestTime'] - x['Activity Start Date and Time* (UTC)']) / np.timedelta64(1, 's'), 1)
+    for tol in range(first_tol, command_line_args.tolerance + 1, constants.CALCULATE_EVERY_N_SECS):
+        print("TOLERANCE:", str(tol))
+        # merge dataframes
+        merged_data_frame, num_matches_df = merge(gt_data, oba_data, tol)
 
-    df_time_diff = merged_data_frame.loc[:, ['Time_Difference']]
-    df_time_diff = df_time_diff.dropna()
-    print(df_time_diff.shape)
-    # boxplot = df_time_diff.boxplot(column=['Time_Difference'])
-    # path_figure = os.path.join(command_line_args.outputDir, constants.FOLDER_MERGED_DATA, "boxplot.png")
-    # plt.savefig(path_figure, format='png')
-    # plt.show()
+        # Calculate difference
+        merged_data_frame['Time_Difference'] = merged_data_frame.apply(
+            lambda x: (x['Activity Start Date and Time* (UTC)'] - x['ClosestTime']) / np.timedelta64(1, 's'), 1)
 
-    now = datetime.now()  # current date and time
-    date_time = now.strftime("%y%m%d_%H%M")
-    # Save merged data to csv
-    merged_file_path = os.path.join(command_line_args.outputDir, constants.FOLDER_MERGED_DATA,
-                                    constants.MERGED_DATA_FILE_NAME + "_" + date_time + "_" +
-                                    str(command_line_args.tolerance) + ".csv")
-    num_matches_file_path = os.path.join(command_line_args.outputDir, constants.FOLDER_MERGED_DATA,
-                                    "num_matches" + "_" + date_time + "_" +
-                                    str(command_line_args.tolerance) + ".csv")
-    merged_data_frame.to_csv(path_or_buf=merged_file_path, index=False)
-    num_matches_df.to_csv(path_or_buf=num_matches_file_path, index=False)
+        # df_time_diff = merged_data_frame.loc[:, ['Time_Difference']]
+        # df_time_diff = df_time_diff.dropna()
+        # print(df_time_diff.shape)
+        # boxplot = df_time_diff.boxplot(column=['Time_Difference'])
+        # path_figure = os.path.join(command_line_args.outputDir, constants.FOLDER_MERGED_DATA, "boxplot.png")
+        # plt.savefig(path_figure, format='png')
+        # plt.show()
+
+        # Calculate distance between GT and OBA starting points
+        merged_data_frame['Distance_Difference'] = merged_data_frame.apply(
+            lambda row: hs.haversine((row['GT_LatOrig'], row['GT_LonOrig']),
+                                     (row['Origin latitude (*best)'], row['Origin longitude (*best)']),
+                                     unit=Unit.METERS), axis=1)
+
+        #now = datetime.now()  # current date and time
+        #date_time = now.strftime("%y%m%d_%H%M")
+        # Save merged data to csv
+        merged_file_path = os.path.join(command_line_args.outputDir, save_to_path,
+                                        constants.MERGED_DATA_FILE_NAME + "_" + str(tol) + ".csv")
+        num_matches_file_path = os.path.join(command_line_args.outputDir, save_to_path,
+                                             "num_matches" + "_" + str(tol) + ".csv")
+        merged_data_frame.to_csv(path_or_buf=merged_file_path, index=False)
+        num_matches_df.to_csv(path_or_buf=num_matches_file_path, index=False)
 
 
 def merge(gt_data, oba_data, tolerance):
@@ -173,14 +190,14 @@ def merge(gt_data, oba_data, tolerance):
 
             temp_merge = pd.merge_asof(gt_data_collector, oba_data_user, left_on="ClosestTime",
                                        right_on="Activity Start Date and Time* (UTC)",
-                                       direction="nearest",
+                                       direction="forward",
                                        tolerance=pd.Timedelta(str(tolerance) + "ms"), left_by='GT_Mode',
                                        right_by='Google Activity')
             merged_df = pd.concat([merged_df, temp_merge], ignore_index=True)
             # Print number of matches
             print("\t Oba user", oba_user[-4:], "\tMatches: ", (temp_merge["User ID"] == oba_user).sum(), " out of ",
                   (temp_merge["GT_Collector"] == collector).sum())
-            #matches_df[(matches_df["GT_Collector"] == collector)][oba_user] = (temp_merge["User ID"] == oba_user).sum()
+            # matches_df[(matches_df["GT_Collector"] == collector)][oba_user] = (temp_merge["User ID"] == oba_user).sum()
             list_matches_by_phone.append((temp_merge["User ID"] == oba_user).sum())
             matches_dict[oba_user[-4:]].append((temp_merge["User ID"] == oba_user).sum())
             i += 1

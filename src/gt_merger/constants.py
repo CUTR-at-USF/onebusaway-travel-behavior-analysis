@@ -37,3 +37,6 @@ MERGED_DATA_FILE_NAME = "mergedData"
 OBA_RELEVANT_COLS_LIST = ['Activity Start Date and Time* (UTC)', 'Origin location Date and Time (*best) (UTC)',
                           'Duration* (minutes)', 'Origin-Destination Bird-Eye Distance* (meters)']
 GT_RELEVANT_COLS_LIST = ['GT_Date', 'GT_TimeOrig']
+
+# Boolean to generate results in tolerance ranges every N milliseconds up to the TOLERANCE value
+CALCULATE_EVERY_N_SECS = 30000
