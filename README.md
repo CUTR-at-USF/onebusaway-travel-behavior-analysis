@@ -42,6 +42,12 @@ The csv file must include the following columns:
 `--minTripLength 60` will remove, from the oba generated data, activities whose `Origin-Destination Bird-Eye Distance* (meters)` is less than 60 meters.
 * `--tolerance <milliseconds>` Maximum tolerated difference (milliseconds) between matched ground truth data start activity and OBA data start activity. 
 By default, it is 3000 milliseconds. Example usage: `--tolerance 5000` will consider only a difference equal or less than 5000 milliseconds while looking for a match between a ground truth data start activity and a OBA data start activity.
+* `no-iterateOverTol` When used, the merging process will only be applied once over the tolerance defined by `tolerance`. 
+By default, the merging process is applied over tolerances iterating from 30000 to `tolerance` in steps of 30000.
+Example usage: `no-iterateOverTol`.
+* `--no-removeStillMode` When used, preprocess of input datasets will not eliminate the records with activity mode equal to `STILL`.
+By default, preprocess of input dataset eliminates the records with activity mode equal to `STILL`.
+Example usage: `--no-removeStillMode`.
 
 ### Acknowledgements
 

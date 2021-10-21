@@ -15,17 +15,14 @@
  * limitations under the License.
  */
  """
-from datetime import datetime
 import os
+# Import dependencies
+from collections import defaultdict
 from pathlib import Path
 
+import haversine as hs
 import numpy as np
 import pandas as pd
-
-# Import dependencies
-from matplotlib import pyplot as plt
-from collections import defaultdict
-import haversine as hs
 from haversine import Unit
 
 from src.gt_merger import constants
@@ -84,9 +81,8 @@ def main():
         exit()
 
     # Preprocess ground truth data
-    gt_data, data_gt_dropped = preprocess_gt_data(gt_data)
-    # Drop records with still mode
-    gt_data = gt_data[gt_data.GT_Mode != 'STILL']
+    gt_data, data_gt_dropped = preprocess_gt_data(gt_data, command_line_args.removeStillMode)
+
     print("Ground truth data preprocessed.")
     # Save data to be dropped to a csv file
     dropped_file_path = os.path.join(command_line_args.outputDir, constants.FOLDER_LOGS,
@@ -104,7 +100,7 @@ def main():
 
     # Preprocess OBA data
     oba_data, data_csv_dropped = preprocess_oba_data(oba_data, command_line_args.minActivityDuration,
-                                                     command_line_args.minTripLength)
+                                                     command_line_args.minTripLength, command_line_args.removeStillMode)
     print("OBA data preprocessed.")
 
     # Data preprocessing is over
@@ -129,22 +125,12 @@ def main():
         merged_data_frame['Time_Difference'] = merged_data_frame.apply(
             lambda x: (x['Activity Start Date and Time* (UTC)'] - x['ClosestTime']) / np.timedelta64(1, 's'), 1)
 
-        # df_time_diff = merged_data_frame.loc[:, ['Time_Difference']]
-        # df_time_diff = df_time_diff.dropna()
-        # print(df_time_diff.shape)
-        # boxplot = df_time_diff.boxplot(column=['Time_Difference'])
-        # path_figure = os.path.join(command_line_args.outputDir, constants.FOLDER_MERGED_DATA, "boxplot.png")
-        # plt.savefig(path_figure, format='png')
-        # plt.show()
-
         # Calculate distance between GT and OBA starting points
         merged_data_frame['Distance_Difference'] = merged_data_frame.apply(
             lambda row: hs.haversine((row['GT_LatOrig'], row['GT_LonOrig']),
                                      (row['Origin latitude (*best)'], row['Origin longitude (*best)']),
                                      unit=Unit.METERS), axis=1)
 
-        #now = datetime.now()  # current date and time
-        #date_time = now.strftime("%y%m%d_%H%M")
         # Save merged data to csv
         merged_file_path = os.path.join(command_line_args.outputDir, save_to_path,
                                         constants.MERGED_DATA_FILE_NAME + "_" + str(tol) + ".csv")
