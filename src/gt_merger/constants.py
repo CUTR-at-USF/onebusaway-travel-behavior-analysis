@@ -35,7 +35,8 @@ MERGED_DATA_FILE_NAME = "mergedData"
 
 # List of columns where NaN values are not allowed
 OBA_RELEVANT_COLS_LIST = ['Activity Start Date and Time* (UTC)', 'Origin location Date and Time (*best) (UTC)',
-                          'Duration* (minutes)', 'Origin-Destination Bird-Eye Distance* (meters)']
+                          'Duration* (minutes)', 'Origin-Destination Bird-Eye Distance* (meters)',
+                          'Destination Location Date and Time (*best) (UTC)']
 GT_RELEVANT_COLS_LIST = ['GT_Date', 'GT_TimeOrig', 'GT_TimeDest']
 
 # Boolean to generate results in tolerance ranges every N milliseconds up to the TOLERANCE value
