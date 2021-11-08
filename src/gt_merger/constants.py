@@ -41,3 +41,37 @@ GT_RELEVANT_COLS_LIST = ['GT_Date', 'GT_TimeOrig', 'GT_TimeDest']
 
 # Boolean to generate results in tolerance ranges every N milliseconds up to the TOLERANCE value
 CALCULATE_EVERY_N_SECS = 30000
+
+# New columns order for merged dataframe
+GT_NEW_COLUMNS_ORDER = ['GT_Collector', 'GT_Date', 'GT_TimeOrig',
+                        'GT_TimeOrigMinuteRounded', 'GT_TimeZone', 'GT_LatOrig', 'GT_LonOrig', 'GT_LocationOrig',
+                        'GT_TimeDest', 'GT_TimeDestMinuteRounded', 'GT_LatDest', 'GT_LonDest', 'GT_LocDest',
+                        'GT_Comments',
+                        'GT_DateTimeCombined', 'GT_DateTimeDestCombined',
+                        'GT_TourID', 'GT_TripID', 'GT_Mode', 'GT_DateTimeOrigUTC', 'GT_DateTimeDestUTC']
+OBA_NEW_COLUMNS_ORDER = ['User ID', 'Trip ID', 'Google Activity', 'Google Activity Confidence',
+                         'Origin location Date and Time (*best) (UTC)',
+                         'Destination Location Date and Time (*best) (UTC)',
+                         'Time_Difference', 'Distance_Difference',
+                         'Vehicle type', 'Region ID',
+                         'Activity Start Date and Time* (UTC)',
+                         'Activity Start/Origin Time Diff* (minutes)', 'Origin latitude (*best)',
+                         'Origin longitude (*best)',
+                         'Origin Horizontal Accuracy (meters) (*best)', 'Origin Location Provider (*best)',
+                         'Activity Destination Date and Time* (UTC)',
+                         'Activity End/Destination Time Diff* (minutes)', 'Destination latitude (*best)',
+                         'Destination longitude (*best)', 'Destination Horizontal Accuracy (meters) (*best)',
+                         'Destination Location Provider (*best)', 'Duration* (minutes)',
+                         'Origin-Destination Bird-Eye Distance* (meters)', 'Chain ID', 'Chain Index', 'Tour ID',
+                         'Tour Index', 'Ignoring Battery Optimizations', 'Talk Back Enabled', 'Power Save Mode Enabled',
+                         'Origin fused Date and Time (UTC)', 'Origin fused latitude', 'Origin fused longitude',
+                         'Origin fused Horizontal Accuracy (meters)', 'Origin gps Date and Time (UTC)',
+                         'Origin gps latitude', 'Origin gps longitude', 'Origin gps Horizontal Accuracy (meters)',
+                         'Origin network Date and Time (UTC)', 'Origin network latitude', 'Origin network longitude',
+                         'Origin network Horizontal Accuracy (meters)', 'Destination fused Date and Time (UTC)',
+                         'Destination fused latitude', 'Destination fused longitude',
+                         'Destination fused Horizontal Accuracy (meters)', 'Destination gps Date and Time (UTC)',
+                         'Destination gps latitude', 'Destination gps longitude',
+                         'Destination gps Horizontal Accuracy (meters)', 'Destination network Date and Time (UTC)',
+                         'Destination network latitude', 'Destination network longitude',
+                         'Destination network Horizontal Accuracy (meters)']
