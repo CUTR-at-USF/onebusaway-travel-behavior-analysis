@@ -48,6 +48,10 @@ Example usage: `no-iterateOverTol`.
 * `--no-removeStillMode` When used, preprocess of input datasets will not eliminate the records with activity mode equal to `STILL`.
 By default, preprocess of input dataset eliminates the records with activity mode equal to `STILL`.
 Example usage: `--no-removeStillMode`.
+* `--mergeOneToOne` This flag will force the merging system to merge each `Ground Truth trip` with one and only one OBA 
+record according to the other command line parameters. By default, this flag is set to False. In such case, the merger 
+will match each `Ground Truth trip` with all the OBa records that starts after the `Ground Truth trip` starts and before
+the `Ground Truth trip` ends. Example usage: `--mergeOneToOne`
 
 ### Acknowledgements
 

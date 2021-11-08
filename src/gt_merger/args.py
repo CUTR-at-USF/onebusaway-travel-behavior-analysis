@@ -53,6 +53,10 @@ def get_parser():
     parser.add_argument('--no-removeStillMode', dest='removeStillMode', action='store_false')
     parser.set_defaults(removeStillMode=True)
 
+    parser.add_argument('--mergeOneToOne', dest='mergeOneToOne', action='store_true')
+    parser.add_argument('--no-mergeOneToOne', dest='mergeOneToOne', action='store_false')
+    parser.set_defaults(mergeOneToOne=False)
+
     args = parser.parse_args()
 
     return args
