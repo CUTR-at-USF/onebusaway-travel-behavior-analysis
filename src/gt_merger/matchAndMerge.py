@@ -102,8 +102,10 @@ def main():
     oba_data, data_csv_dropped = preprocess_oba_data(oba_data, command_line_args.minActivityDuration,
                                                      command_line_args.minTripLength, command_line_args.removeStillMode)
     print("OBA data preprocessed.")
+    print(oba_data.info())
+    print(gt_data.info())
 
-    # Data preprocessing is over
+    # Data preprocessing IS OVER
     # Save oba dropped data to a csv file
     dropped_file_path = os.path.join(command_line_args.outputDir, constants.FOLDER_LOGS,
                                      constants.OBA_DROPPED_DATA_FILE_NAME)
@@ -118,12 +120,16 @@ def main():
 
     for tol in range(first_tol, command_line_args.tolerance + 1, constants.CALCULATE_EVERY_N_SECS):
         print("TOLERANCE:", str(tol))
-        # merge dataframes
-        merged_data_frame, num_matches_df = merge(gt_data, oba_data, tol)
+        # merge dataframes one to one or one to many according to the commandline parameter
+        if command_line_args.mergeOneToOne:
+            merged_data_frame, num_matches_df = merge(gt_data, oba_data, tol)
+        else:
+            merged_data_frame, num_matches_df = merge_to_many(gt_data, oba_data, tol)
 
         # Calculate difference
         merged_data_frame['Time_Difference'] = merged_data_frame.apply(
-            lambda x: (x['Activity Start Date and Time* (UTC)'] - x['ClosestTime']) / np.timedelta64(1, 's'), 1)
+            lambda x: (x['Origin location Date and Time (*best) (UTC)'] - x['GT_DateTimeOrigUTC']) / np.timedelta64(1, 's')
+            if pd.notna(x['Origin location Date and Time (*best) (UTC)']) else "", 1)
 
         # Calculate distance between GT and OBA starting points
         merged_data_frame['Distance_Difference'] = merged_data_frame.apply(
@@ -131,6 +137,9 @@ def main():
                                      (row['Origin latitude (*best)'], row['Origin longitude (*best)']),
                                      unit=Unit.METERS), axis=1)
 
+        # Reorder merged dataframe columns
+        new_column_orders = constants.GT_NEW_COLUMNS_ORDER + constants.OBA_NEW_COLUMNS_ORDER
+        merged_data_frame = merged_data_frame[new_column_orders]
         # Save merged data to csv
         merged_file_path = os.path.join(command_line_args.outputDir, save_to_path,
                                         constants.MERGED_DATA_FILE_NAME + "_" + str(tol) + ".csv")
@@ -142,14 +151,14 @@ def main():
 
 def merge(gt_data, oba_data, tolerance):
     """
-    Merge gt_data dataframe and oba_data dataframe using the nearest value between columns 'gt_data.ClosestTime' and
+    Merge gt_data dataframe and oba_data dataframe using the nearest value between columns 'gt_data.GT_DateTimeOrigUTC' and
     'oba_data.Activity Start Date and Time* (UTC)'. Before merging, the data is grouped by 'GT_Collector' on gt_data and
     each row on gt_data will be paired with one or none of the rows on oba_data grouped by userId.
-    :param tolerance: maximum allowed difference (seconds) between 'gt_data.ClosestTime' and
+    :param tolerance: maximum allowed difference (seconds) between 'gt_data.GT_DateTimeOrigUTC' and
     'oba_data.Activity Start Date and Time* (UTC)'.
     :param gt_data: dataframe with preprocessed data from ground truth XLSX data file
     :param oba_data: dataframe with preprocessed data from OBA firebase export CSV data file
-    :return: dataframe with the merged data.
+    :return: dataframe with the merged data and a dataframe with summary of matches by collector/oba_user(phone).
     """
     list_collectors = gt_data['GT_Collector'].unique()
     list_oba_users = oba_data['User ID'].unique()
@@ -163,7 +172,7 @@ def merge(gt_data, oba_data, tolerance):
         # Create dataframe for a collector on list_collectors
         gt_data_collector = gt_data[gt_data["GT_Collector"] == collector]
         # Make sure dataframe is sorted by 'ClosesTime'
-        gt_data_collector.sort_values('ClosestTime', inplace=True)
+        gt_data_collector.sort_values('GT_DateTimeOrigUTC', inplace=True)
         # Add total trips per collector
         list_total_trips.append(len(gt_data_collector))
         i = 0
@@ -174,7 +183,7 @@ def merge(gt_data, oba_data, tolerance):
             # Make sure dataframes is sorted by 'Activity Start Date and Time* (UTC)'
             oba_data_user.sort_values('Activity Start Date and Time* (UTC)', inplace=True)
 
-            temp_merge = pd.merge_asof(gt_data_collector, oba_data_user, left_on="ClosestTime",
+            temp_merge = pd.merge_asof(gt_data_collector, oba_data_user, left_on="GT_DateTimeOrigUTC",
                                        right_on="Activity Start Date and Time* (UTC)",
                                        direction="forward",
                                        tolerance=pd.Timedelta(str(tolerance) + "ms"), left_by='GT_Mode',
@@ -183,7 +192,7 @@ def merge(gt_data, oba_data, tolerance):
             # Print number of matches
             print("\t Oba user", oba_user[-4:], "\tMatches: ", (temp_merge["User ID"] == oba_user).sum(), " out of ",
                   (temp_merge["GT_Collector"] == collector).sum())
-            # matches_df[(matches_df["GT_Collector"] == collector)][oba_user] = (temp_merge["User ID"] == oba_user).sum()
+
             list_matches_by_phone.append((temp_merge["User ID"] == oba_user).sum())
             matches_dict[oba_user[-4:]].append((temp_merge["User ID"] == oba_user).sum())
             i += 1
@@ -193,6 +202,69 @@ def merge(gt_data, oba_data, tolerance):
     matches_df = pd.concat([matches_df, numbers_df], axis=1)
     print("matches", matches_df.head())
     print("List of matches", list_matches)
+    return merged_df, matches_df
+
+
+def merge_to_many(gt_data, oba_data, tolerance):
+    """
+    Merge gt_data dataframe and oba_data dataframe using the nearest value between columns 'gt_data.GT_DateTimeOrigUTC' and
+    'oba_data.Activity Start Date and Time* (UTC)'. Before merging, the data is grouped by 'GT_Collector' on gt_data and
+    each row on gt_data will be paired with one or none of the rows on oba_data grouped by userId.
+    :param tolerance: maximum allowed difference (seconds) between 'gt_data.GT_DateTimeOrigUTC' and
+    'oba_data.Activity Start Date and Time* (UTC)'.
+    :param gt_data: dataframe with preprocessed data from ground truth XLSX data file
+    :param oba_data: dataframe with preprocessed data from OBA firebase export CSV data file
+    :return: dataframe with the merged data.
+    """
+    # List of unique collectors and and unique users
+    list_collectors = gt_data['GT_Collector'].unique()
+    list_oba_users = oba_data['User ID'].unique()
+
+    # Create empty dataframes to be returned
+    merged_df = pd.DataFrame()
+    matches_df = pd.DataFrame()
+    list_total_trips = []
+    for collector in list_collectors:
+        print("Merging data for collector ", collector)
+        # Create dataframe for a collector on list_collectors
+        gt_data_collector = gt_data[gt_data["GT_Collector"] == collector]
+        # Make sure dataframe is sorted by 'ClosesTime'
+        gt_data_collector.sort_values('GT_DateTimeOrigUTC', inplace=True)
+        # Add total trips per collector
+        list_total_trips.append(len(gt_data_collector))
+        i = 0
+        for oba_user in list_oba_users:
+            # Create a dataframe with the oba_user activities only
+            oba_data_user = oba_data[oba_data["User ID"] == oba_user]
+            # Make sure dataframes is sorted by 'Activity Start Date and Time* (UTC)'
+            oba_data_user.sort_values('Activity Start Date and Time* (UTC)', inplace=True)
+
+            # Iterate over each trip of one collector to match it with zero to many activities of an oba_data_user
+            for index, row in gt_data_collector.iterrows():
+                bunch_of_matches = oba_data_user[(oba_data_user['Origin location Date and Time (*best) (UTC)'] >=
+                                                 row['GT_DateTimeOrigUTC']) &
+                                                 (oba_data_user['Origin location Date and Time (*best) (UTC)'] <=
+                                                  row['GT_DateTimeDestUTC'])
+                                                 ]
+                # Get the size of bunch_of_matches to create a repeated dataframe to concatenate with
+                if bunch_of_matches.empty:
+                    len_bunch = 1
+                else:
+                    len_bunch = bunch_of_matches.shape[0]
+                subset_df = gt_data_collector.loc[[index], :]
+                new_df = pd.DataFrame(np.repeat(subset_df.values, len_bunch, axis=0))
+                new_df.columns = gt_data_collector.columns
+
+                temp_merge = pd.concat([new_df.reset_index(drop=True), bunch_of_matches.reset_index(drop=True)],
+                                       axis=1)
+                # Merge running matches with current set of found matches
+                merged_df = pd.concat([merged_df, temp_merge], ignore_index=True)
+
+                # Add oba_user and number of many matches to the matches_df
+                subset_df["User ID"] = oba_user[-4:]
+                subset_df["GT_NumberOfTransitions"] = 0 if bunch_of_matches.empty else len_bunch
+                matches_df = pd.concat([matches_df, subset_df], ignore_index=True)
+
     return merged_df, matches_df
 
 
