@@ -74,9 +74,19 @@ def preprocess_oba_data(data_csv, min_activity_duration, min_trip_length, remove
     if remove_still_mode:
         data_csv = data_csv[data_csv['Google Activity'] != 'STILL']
 
-    # Change Activity Start Date and Time* (UTC) to datetime
+    # Assure that 'Activity Start Date and Time* (UTC)' is datetime
     data_csv['Activity Start Date and Time* (UTC)'] = pd.to_datetime(data_csv['Activity Start Date and Time* (UTC)'],
                                                                      errors='coerce', utc=True)
+
+    # Assure that 'Origin location Date and Time (*best) (UTC)' is datetime
+    data_csv['Origin location Date and Time (*best) (UTC)'] = pd.to_datetime(data_csv['Origin location Date and Time '
+                                                                                      '(*best) (UTC)'],
+                                                                             errors='coerce', utc=True)
+
+    # Assure that 'Destination Location Date and Time (*best) (UTC)' is datetime
+    data_csv['Destination Location Date and Time (*best) (UTC)'] = pd.to_datetime(
+        data_csv['Destination Location Date and Time (*best) (UTC)'],
+        errors='coerce', utc=True)
 
     # Drop NaN rows for relevant columns
     clean_data_csv = data_csv.dropna(
@@ -119,9 +129,13 @@ def preprocess_gt_data(gt_data, remove_still_mode):
 
     # Change data type of TimeOrig to string to make possible date-time casting
     gt_data.GT_TimeOrig = gt_data.GT_TimeOrig.astype(str)
-
     # Change the GT_TimeOrig column to datetime.time, coerce will produce NaT if the change is not possible
     gt_data['GT_TimeOrig'] = pd.to_datetime(gt_data['GT_TimeOrig'], errors='coerce').dt.time
+
+    # Change data type of GT_TimeDest to string to make possible date-time casting
+    gt_data.GT_TimeDest = gt_data.GT_TimeDest.astype(str)
+    # Change the GT_TimeDest column to datetime.time, coerce will produce NaT if the change is not possible
+    gt_data['GT_TimeDest'] = pd.to_datetime(gt_data['GT_TimeDest'], errors='coerce').dt.time
 
     # Drop rows with NaT on GT_Date or GT_TimeOrig
     clean_gt_data = gt_data.dropna(subset=constants.GT_RELEVANT_COLS_LIST)
@@ -133,11 +147,19 @@ def preprocess_gt_data(gt_data, remove_still_mode):
     # Create GT_DateTimeCombined column
     clean_gt_data.loc[:, 'GT_DateTimeCombined'] = clean_gt_data.apply(
         lambda x: datetime.datetime.combine(x.GT_Date, x.GT_TimeOrig), 1)
-
     # Assign timezone to GT_DateTimeCombined
     clean_gt_data.loc[:, 'GT_DateTimeCombined'] = clean_gt_data.apply(
         lambda x: pytz.timezone(x.GT_TimeZone).localize(x.GT_DateTimeCombined), 1)
-
     # Add column to be used in function "merge_asoft"
-    clean_gt_data.loc[:, 'ClosestTime'] = clean_gt_data['GT_DateTimeCombined'].dt.tz_convert('UTC')
+    clean_gt_data.loc[:, 'GT_DateTimeOrigUTC'] = clean_gt_data['GT_DateTimeCombined'].dt.tz_convert('UTC')
+
+    # Create GT_DateTimeDestCombined column
+    clean_gt_data.loc[:, 'GT_DateTimeDestCombined'] = clean_gt_data.apply(
+        lambda x: datetime.datetime.combine(x.GT_Date, x.GT_TimeDest), 1)
+    # Assign timezone to GT_DateTimeDestCombined
+    clean_gt_data.loc[:, 'GT_DateTimeDestCombined'] = clean_gt_data.apply(
+        lambda x: pytz.timezone(x.GT_TimeZone).localize(x.GT_DateTimeDestCombined), 1)
+    # Add column to be used in "merge" functions
+    clean_gt_data.loc[:, 'GT_DateTimeDestUTC'] = clean_gt_data['GT_DateTimeDestCombined'].dt.tz_convert('UTC')
+
     return clean_gt_data, data_gt_dropped
