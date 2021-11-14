@@ -137,6 +137,8 @@ def main():
                                      (row['Origin latitude (*best)'], row['Origin longitude (*best)']),
                                      unit=Unit.METERS), axis=1)
 
+        # Add Manual Assignment Column before reorganize
+        merged_data_frame["Manual Assignment"] = ''
         # Reorder merged dataframe columns
         new_column_orders = constants.GT_NEW_COLUMNS_ORDER + constants.OBA_NEW_COLUMNS_ORDER
         merged_data_frame = merged_data_frame[new_column_orders]
