@@ -52,6 +52,9 @@ Example usage: `--no-removeStillMode`.
 record according to the other command line parameters. By default, this flag is set to False. In such case, the merger 
 will match each `Ground Truth trip` with all the OBa records that starts after the `Ground Truth trip` starts and before
 the `Ground Truth trip` ends. Example usage: `--mergeOneToOne`
+* `--repeatGtRows` This flag will force the merging system to repeat a GT trip as many rows as matches are found
+before exporting the output. By default, this flag is set to False. In such case, the merger wil only include
+one DT data row per trip while merging with a device. Example usage: `--repeatGtRows`
 
 ### Acknowledgements
 
