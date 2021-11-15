@@ -31,10 +31,10 @@ class PreprocessTest(unittest.TestCase):
         """ Load dataframes used to perform tests. """
         oba_file_path = os.path.join(os.path.dirname(__file__), 'data_test/travel-behavior-test.csv')
         self.oba_df = pd.read_csv(oba_file_path)
-        self.clean_oba_df, _ = preprocess.preprocess_oba_data(self.oba_df, 5, 50)
+        self.clean_oba_df, _ = preprocess.preprocess_oba_data(self.oba_df, 5, 50, True)
         gt_file_path = os.path.join(os.path.dirname(__file__), 'data_test/GT_test.xlsx')
         self.gt_df = pd.read_excel(gt_file_path, engine='openpyxl')
-        self.clean_gt_df, _ = preprocess.preprocess_gt_data(self.gt_df)
+        self.clean_gt_df, _ = preprocess.preprocess_gt_data(self.gt_df, True)
         pass
 
     def tearDown(self):
@@ -64,8 +64,8 @@ class PreprocessTest(unittest.TestCase):
         self.assertFalse(unnamed_cols)
 
     def test_gt_datetime_type_column(self):
-        """ Test that 'ClosestTime' was converted to datetime, this column is used for merging"""
-        self.assertTrue(pd.api.types.is_datetime64_any_dtype(self.clean_gt_df['ClosestTime']))
+        """ Test that 'GT_DateTimeDestUTC' was converted to datetime, this column is used for asoft merging"""
+        self.assertTrue(pd.api.types.is_datetime64_any_dtype(self.clean_gt_df['GT_DateTimeDestUTC']))
 
 
 if __name__ == '__main__':
