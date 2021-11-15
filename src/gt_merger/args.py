@@ -57,6 +57,10 @@ def get_parser():
     parser.add_argument('--no-mergeOneToOne', dest='mergeOneToOne', action='store_false')
     parser.set_defaults(mergeOneToOne=False)
 
+    parser.add_argument('--repeatGtRows', dest='repeatGtRows', action='store_true')
+    parser.add_argument('--no-repeatGtRows', dest='repeatGtRows', action='store_false')
+    parser.set_defaults(mergeOneToOne=False)
+
     args = parser.parse_args()
 
     return args
