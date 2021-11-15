@@ -254,8 +254,14 @@ def merge_to_many(gt_data, oba_data, tolerance):
                 else:
                     len_bunch = bunch_of_matches.shape[0]
                 subset_df = gt_data_collector.loc[[index], :]
+                # Repeat the firs row `len_bunch` times.
                 new_df = pd.DataFrame(np.repeat(subset_df.values, len_bunch, axis=0))
                 new_df.columns = gt_data_collector.columns
+
+                # Remove repeated GT rows unless required no to
+                if len_bunch > 1 and not command_line_args.repeatGtRows:
+                    new_df.loc[1:, new_df.columns.difference(['GT_DateTimeOrigUTC', 'GT_LatOrig', 'GT_LonOrig',
+                                                              'GT_TourID', 'GT_TripID'])] = np.NaN
 
                 temp_merge = pd.concat([new_df.reset_index(drop=True), bunch_of_matches.reset_index(drop=True)],
                                        axis=1)
