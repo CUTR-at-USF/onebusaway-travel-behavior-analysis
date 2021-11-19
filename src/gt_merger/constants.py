@@ -48,7 +48,7 @@ GT_NEW_COLUMNS_ORDER = ['GT_Collector', 'GT_Date', 'GT_TimeOrig',
                         'GT_TimeDest', 'GT_TimeDestMinuteRounded', 'GT_LatDest', 'GT_LonDest', 'GT_LocDest',
                         'GT_Comments',
                         'GT_DateTimeCombined', 'GT_DateTimeDestCombined',
-                        'GT_TourID', 'GT_TripID', 'GT_Mode', 'GT_DateTimeOrigUTC', 'GT_DateTimeDestUTC']
+                        'GT_TourID', 'GT_TripID', 'GT_Mode', 'GT_DateTimeOrigUTC_Backup', 'GT_DateTimeDestUTC']
 OBA_NEW_COLUMNS_ORDER = ['Google Activity', 'Origin location Date and Time (*best) (UTC)',
                          'Destination Location Date and Time (*best) (UTC)',
                          'Manual Assignment', 'Trip ID', 'User ID',  'Google Activity Confidence',
@@ -74,4 +74,4 @@ OBA_NEW_COLUMNS_ORDER = ['Google Activity', 'Origin location Date and Time (*bes
                          'Destination gps latitude', 'Destination gps longitude',
                          'Destination gps Horizontal Accuracy (meters)', 'Destination network Date and Time (UTC)',
                          'Destination network latitude', 'Destination network longitude',
-                         'Destination network Horizontal Accuracy (meters)']
+                         'Destination network Horizontal Accuracy (meters)', 'GT_DateTimeOrigUTC']

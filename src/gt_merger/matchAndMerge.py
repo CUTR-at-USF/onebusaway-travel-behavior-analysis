@@ -128,7 +128,7 @@ def main():
 
         # Calculate difference
         merged_data_frame['Time_Difference'] = merged_data_frame.apply(
-            lambda x: (x['Origin location Date and Time (*best) (UTC)'] - x['GT_DateTimeOrigUTC']) / np.timedelta64(1, 's')
+            lambda x: (x['Origin location Date and Time (*best) (UTC)'] - x['GT_DateTimeOrigUTC_Backup']) / np.timedelta64(1, 's')
             if pd.notna(x['Origin location Date and Time (*best) (UTC)']) else "", 1)
 
         # Calculate distance between GT and OBA starting points
@@ -257,6 +257,8 @@ def merge_to_many(gt_data, oba_data, tolerance):
                 # Repeat the firs row `len_bunch` times.
                 new_df = pd.DataFrame(np.repeat(subset_df.values, len_bunch, axis=0))
                 new_df.columns = gt_data_collector.columns
+                # Add backup Start Time Columns
+                new_df['GT_DateTimeOrigUTC_Backup'] = new_df['GT_DateTimeOrigUTC']
 
                 # Remove repeated GT rows unless required no to
                 if len_bunch > 1 and not command_line_args.repeatGtRows:
