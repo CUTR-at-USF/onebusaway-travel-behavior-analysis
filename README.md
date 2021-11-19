@@ -17,7 +17,7 @@ The csv file must include the following columns:
   * `Duration* (minutes)` Duration of the activity in minutes.
   * `Origin-Destination Bird-Eye Distance* (meters)` Euclidean distance (meters) between origin and destination recorded for the activity.
   * `Google Activity` Detected activity including Android supported activities plus 'OBA firebase export' additional activities ('IN_VEHICLE', 'ON_BICYCLE', 'RUNNING', 'WALKING', 'WALKING/RUNNING', 'STILL')
-* `--gtFile <ground truth xlsx file>` A xlsx file that must be formatted as shown below. The main (required) column descriptions are:
+  * `--gtFile <ground truth xlsx file>` A xlsx file that must be formatted as shown below. The main (required) column descriptions are:
   * `GT_Collector` User name of the GT data collector
   * `GT_Mode` Activity mode ('WALKING', 'IN_VEHICLE', 'STILL', 'ON_BICYCLE', 'IN_BUS')
   * `GT_Date` Date of the recorded activity
@@ -42,9 +42,9 @@ The csv file must include the following columns:
 `--minTripLength 60` will remove, from the oba generated data, activities whose `Origin-Destination Bird-Eye Distance* (meters)` is less than 60 meters.
 * `--tolerance <milliseconds>` Maximum tolerated difference (milliseconds) between matched ground truth data start activity and OBA data start activity. 
 By default, it is 3000 milliseconds. Example usage: `--tolerance 5000` will consider only a difference equal or less than 5000 milliseconds while looking for a match between a ground truth data start activity and a OBA data start activity.
-* `no-iterateOverTol` When used, the merging process will only be applied once over the tolerance defined by `tolerance`. 
-By default, the merging process is applied over tolerances iterating from 30000 to `tolerance` in steps of 30000.
-Example usage: `no-iterateOverTol`.
+* `--iterateOverTol` When used, the merging process is applied over tolerances iterating from 30000 to `tolerance` in steps of 30000.
+By default, the merging process will only be applied once over the tolerance defined by `tolerance`. 
+Example usage: `--no-iterateOverTol`.
 * `--no-removeStillMode` When used, preprocess of input datasets will not eliminate the records with activity mode equal to `STILL`.
 By default, preprocess of input dataset eliminates the records with activity mode equal to `STILL`.
 Example usage: `--no-removeStillMode`.
@@ -54,7 +54,7 @@ will match each `Ground Truth trip` with all the OBa records that starts after t
 the `Ground Truth trip` ends. Example usage: `--mergeOneToOne`
 * `--repeatGtRows` This flag will force the merging system to repeat a GT trip as many rows as matches are found
 before exporting the output. By default, this flag is set to False. In such case, the merger wil only include
-one DT data row per trip while merging with a device. Example usage: `--repeatGtRows`
+one GT data row per trip while merging with a device. Example usage: `--repeatGtRows`
 
 ### Acknowledgements
 

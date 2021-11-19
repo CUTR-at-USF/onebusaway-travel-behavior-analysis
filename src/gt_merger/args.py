@@ -47,7 +47,7 @@ def get_parser():
 
     parser.add_argument('--iterateOverTol', dest='iterateOverTol', action='store_true')
     parser.add_argument('--no-iterateOverTol', dest='iterateOverTol', action='store_false')
-    parser.set_defaults(iterateOverTol=True)
+    parser.set_defaults(iterateOverTol=False)
 
     parser.add_argument('--removeStillMode', dest='removeStillMode', action='store_true')
     parser.add_argument('--no-removeStillMode', dest='removeStillMode', action='store_false')
