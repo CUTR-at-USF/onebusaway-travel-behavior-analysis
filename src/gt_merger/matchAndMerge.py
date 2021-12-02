@@ -243,9 +243,9 @@ def merge_to_many(gt_data, oba_data, tolerance):
 
             # Iterate over each trip of one collector to match it with zero to many activities of an oba_data_user
             for index, row in gt_data_collector.iterrows():
-                bunch_of_matches = oba_data_user[(oba_data_user['Origin location Date and Time (*best) (UTC)'] >=
+                bunch_of_matches = oba_data_user[(oba_data_user['Activity Start Date and Time* (UTC)'] >=
                                                  row['GT_DateTimeOrigUTC']) &
-                                                 (oba_data_user['Origin location Date and Time (*best) (UTC)'] <=
+                                                 (oba_data_user['Activity Start Date and Time* (UTC)'] <=
                                                   row['GT_DateTimeDestUTC'])
                                                  ]
                 # Get the size of bunch_of_matches to create a repeated dataframe to concatenate with
