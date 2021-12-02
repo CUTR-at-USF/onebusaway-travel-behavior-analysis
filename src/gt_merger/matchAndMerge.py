@@ -128,8 +128,8 @@ def main():
 
         # Calculate difference
         merged_data_frame['Time_Difference'] = merged_data_frame.apply(
-            lambda x: (x['Origin location Date and Time (*best) (UTC)'] - x['GT_DateTimeOrigUTC_Backup']) / np.timedelta64(1, 's')
-            if pd.notna(x['Origin location Date and Time (*best) (UTC)']) else "", 1)
+            lambda x: (x['Activity Start Date and Time* (UTC)'] - x['GT_DateTimeOrigUTC_Backup']) / np.timedelta64(1, 's')
+            if pd.notna(x['Activity Start Date and Time* (UTC)']) else "", 1)
 
         # Calculate distance between GT and OBA starting points
         merged_data_frame['Distance_Difference'] = merged_data_frame.apply(
