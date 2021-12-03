@@ -124,7 +124,11 @@ def main():
         if command_line_args.mergeOneToOne:
             merged_data_frame, num_matches_df = merge(gt_data, oba_data, tol)
         else:
-            merged_data_frame, num_matches_df = merge_to_many(gt_data, oba_data, tol)
+            merged_data_frame, num_matches_df, unmatched_oba_trips_df = merge_to_many(gt_data, oba_data, tol)
+            # Save unmatched oba records to csv
+            unmatched_file_path = os.path.join(command_line_args.outputDir, save_to_path,
+                                               "oba_records_without_match_on_GT.csv")
+            unmatched_oba_trips_df.to_csv(path_or_buf=unmatched_file_path, index=False)
 
         # Calculate difference
         merged_data_frame['Time_Difference'] = merged_data_frame.apply(
@@ -225,6 +229,8 @@ def merge_to_many(gt_data, oba_data, tolerance):
     # Create empty dataframes to be returned
     merged_df = pd.DataFrame()
     matches_df = pd.DataFrame()
+    all_unmatched_trips_df = pd.DataFrame()
+
     list_total_trips = []
     for collector in list_collectors:
         print("Merging data for collector ", collector)
@@ -241,6 +247,9 @@ def merge_to_many(gt_data, oba_data, tolerance):
             # Make sure dataframes is sorted by 'Activity Start Date and Time* (UTC)'
             oba_data_user.sort_values('Activity Start Date and Time* (UTC)', inplace=True)
 
+            # Create df for OBA trips without GT Data match
+            oba_unmatched_trips_df = oba_data_user.copy()
+
             # Iterate over each trip of one collector to match it with zero to many activities of an oba_data_user
             for index, row in gt_data_collector.iterrows():
                 bunch_of_matches = oba_data_user[(oba_data_user['Activity Start Date and Time* (UTC)'] >=
@@ -253,6 +262,10 @@ def merge_to_many(gt_data, oba_data, tolerance):
                     len_bunch = 1
                 else:
                     len_bunch = bunch_of_matches.shape[0]
+                    # Remove matched rows from unmatched trips df
+                    oba_unmatched_trips_df = pd.merge(oba_unmatched_trips_df, bunch_of_matches, indicator=True, how='outer').\
+                        query('_merge=="left_only"').drop('_merge', axis=1)
+
                 subset_df = gt_data_collector.loc[[index], :]
                 # Repeat the firs row `len_bunch` times.
                 new_df = pd.DataFrame(np.repeat(subset_df.values, len_bunch, axis=0))
@@ -260,7 +273,7 @@ def merge_to_many(gt_data, oba_data, tolerance):
                 # Add backup Start Time Columns
                 new_df['GT_DateTimeOrigUTC_Backup'] = new_df['GT_DateTimeOrigUTC']
 
-                # Remove repeated GT rows unless required no to
+                # Remove (Fill with NaN) repeated GT rows unless required no to
                 if len_bunch > 1 and not command_line_args.repeatGtRows:
                     new_df.loc[1:, new_df.columns.difference(['GT_DateTimeOrigUTC', 'GT_LatOrig', 'GT_LonOrig',
                                                               'GT_TourID', 'GT_TripID'])] = np.NaN
@@ -275,7 +288,16 @@ def merge_to_many(gt_data, oba_data, tolerance):
                 subset_df["GT_NumberOfTransitions"] = 0 if bunch_of_matches.empty else len_bunch
                 matches_df = pd.concat([matches_df, subset_df], ignore_index=True)
 
-    return merged_df, matches_df
+            # Reorder the OBA columns
+            oba_unmatched_trips_df= oba_unmatched_trips_df[constants.OBA_UNMATCHED_NEW_COLUMNS_ORDER]
+            # Add Collector and device to unmatched trips
+            oba_unmatched_trips_df['User ID'] = oba_user[-4:]
+            # oba_unmatched_trips_df['GT_Collector'] = collector
+            oba_unmatched_trips_df.insert(loc=0, column='GT_Collector', value=collector)
+            # Append the unmatched trips per collector/device to the all unmatched df
+            all_unmatched_trips_df = pd.concat([all_unmatched_trips_df, oba_unmatched_trips_df], ignore_index=True)
+
+    return merged_df, matches_df, all_unmatched_trips_df
 
 
 if __name__ == '__main__':
