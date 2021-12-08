@@ -280,6 +280,8 @@ def merge_to_many(gt_data, oba_data, tolerance):
 
                 temp_merge = pd.concat([new_df.reset_index(drop=True), bunch_of_matches.reset_index(drop=True)],
                                        axis=1)
+                # Make sure the bunch of matches has the 'User Id' even for the empty rows
+                temp_merge["User ID"] = oba_user
                 # Merge running matches with current set of found matches
                 merged_df = pd.concat([merged_df, temp_merge], ignore_index=True)
 
