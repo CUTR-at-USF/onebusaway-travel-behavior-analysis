@@ -61,6 +61,9 @@ def get_parser():
     parser.add_argument('--no-repeatGtRows', dest='repeatGtRows', action='store_false')
     parser.set_defaults(mergeOneToOne=False)
 
+    parser.add_argument('--deviceList', type=str, default="",
+                        help='Path to txt file including list of OBA devices to be used for match and merge')
+
     args = parser.parse_args()
 
     return args
