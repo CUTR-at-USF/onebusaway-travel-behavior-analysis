@@ -32,11 +32,11 @@ class MergeTest(unittest.TestCase):
         """ Load dataframes used to perform tests. """
         oba_file_path = os.path.join(os.path.dirname(__file__), 'data_test/travel-behavior-test.csv')
         self.oba_df = pd.read_csv(oba_file_path)
-        self.clean_oba_df, _ = preprocess.preprocess_oba_data(self.oba_df, 5, 50)
+        self.clean_oba_df, _ = preprocess.preprocess_oba_data(self.oba_df, 5, 50, True)
         gt_file_path = os.path.join(os.path.dirname(__file__), 'data_test/GT_test.xlsx')
         self.gt_df = pd.read_excel(gt_file_path, engine='openpyxl')
-        self.clean_gt_df, _ = preprocess.preprocess_gt_data(self.gt_df)
-        self.merged_data_frame = merge(self.clean_gt_df, self.clean_oba_df, 3000)
+        self.clean_gt_df, _ = preprocess.preprocess_gt_data(self.gt_df, True)
+        self.merged_data_frame, _ = merge(self.clean_gt_df, self.clean_oba_df, 3000)
         pass
 
     def tearDown(self):
@@ -55,11 +55,11 @@ class MergeTest(unittest.TestCase):
     def test_second_merge(self):
         """ Test preprocess OBA has not NaN on relevant columns """
         print(self.merged_data_frame)
-        self.assertTrue((self.merged_data_frame.loc[24, 'GT_Collector'] == 'Stark') &
-                        (self.merged_data_frame.loc[24, 'GT_TourID'] == 1) &
-                        (self.merged_data_frame.loc[24, 'GT_TripID'] == 1) &
-                        (self.merged_data_frame.loc[24, 'User ID'] == 'obaUser_008') &
-                        (self.merged_data_frame.loc[24, 'Trip ID'] == 241))
+        self.assertTrue((self.merged_data_frame.loc[16, 'GT_Collector'] == 'Stark') &
+                        (self.merged_data_frame.loc[16, 'GT_TourID'] == 1) &
+                        (self.merged_data_frame.loc[16, 'GT_TripID'] == 1) &
+                        (self.merged_data_frame.loc[16, 'User ID'] == 'obaUser_008') &
+                        (self.merged_data_frame.loc[16, 'Trip ID'] == 241))
 
 
 if __name__ == '__main__':

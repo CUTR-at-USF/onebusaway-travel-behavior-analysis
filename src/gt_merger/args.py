@@ -45,6 +45,25 @@ def get_parser():
                         help='Maximum tolerated difference (milliseconds, default value ' + str(constants.TOLERANCE) +
                              ') between matched ground truth data activity and OBA data activity')
 
+    parser.add_argument('--iterateOverTol', dest='iterateOverTol', action='store_true')
+    parser.add_argument('--no-iterateOverTol', dest='iterateOverTol', action='store_false')
+    parser.set_defaults(iterateOverTol=False)
+
+    parser.add_argument('--removeStillMode', dest='removeStillMode', action='store_true')
+    parser.add_argument('--no-removeStillMode', dest='removeStillMode', action='store_false')
+    parser.set_defaults(removeStillMode=True)
+
+    parser.add_argument('--mergeOneToOne', dest='mergeOneToOne', action='store_true')
+    parser.add_argument('--no-mergeOneToOne', dest='mergeOneToOne', action='store_false')
+    parser.set_defaults(mergeOneToOne=False)
+
+    parser.add_argument('--repeatGtRows', dest='repeatGtRows', action='store_true')
+    parser.add_argument('--no-repeatGtRows', dest='repeatGtRows', action='store_false')
+    parser.set_defaults(mergeOneToOne=False)
+
+    parser.add_argument('--deviceList', type=str, default="",
+                        help='Path to txt file including white list of OBA devices to be used for match and merge')
+
     args = parser.parse_args()
 
     return args
