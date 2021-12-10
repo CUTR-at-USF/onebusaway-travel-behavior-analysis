@@ -44,6 +44,19 @@ def main():
         print("Ground truth data file not found:", command_line_args.gtFile)
         exit()
 
+    # Verify if there is a list of devices
+    if command_line_args.deviceList:
+        # Verify if the list of devices file exists
+        if os.path.isfile(command_line_args.deviceList):
+            with open(command_line_args.deviceList) as f:
+                list_of_devices = f.readline().split(",")
+                list_of_devices = [s.strip() for s in list_of_devices]
+        else:
+            print("File with white list of devices not found:", command_line_args.deviceList)
+            exit()
+    else:
+        list_of_devices = []
+
     # Verify if the data folder exists
     if not os.path.isdir(command_line_args.outputDir):
         print("Data folder not found, trying to create it in the current working directory:",
@@ -97,6 +110,10 @@ def main():
     if not is_valid_oba_dataframe(oba_data):
         print("OBA data frame is empty or does not have the required columns.")
         exit()
+
+    # If a devices white list was provided, list the devices
+    if list_of_devices:
+        oba_data = oba_data[oba_data["User ID"].isin(list_of_devices)]
 
     # Preprocess OBA data
     oba_data, data_csv_dropped = preprocess_oba_data(oba_data, command_line_args.minActivityDuration,

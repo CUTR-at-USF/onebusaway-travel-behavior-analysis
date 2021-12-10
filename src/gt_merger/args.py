@@ -62,7 +62,7 @@ def get_parser():
     parser.set_defaults(mergeOneToOne=False)
 
     parser.add_argument('--deviceList', type=str, default="",
-                        help='Path to txt file including list of OBA devices to be used for match and merge')
+                        help='Path to txt file including white list of OBA devices to be used for match and merge')
 
     args = parser.parse_args()
 

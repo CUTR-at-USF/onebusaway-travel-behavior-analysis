@@ -55,6 +55,9 @@ the `Ground Truth trip` ends. Example usage: `--mergeOneToOne`
 * `--repeatGtRows` This flag will force the merging system to repeat a GT trip as many rows as matches are found
 before exporting the output. By default, this flag is set to False. In such case, the merger wil only include
 one GT data row per trip while merging with a device. Example usage: `--repeatGtRows`
+* `--deviceList <User ID txt file>` Takes a string with the name of a txt file including the IDs of devices to
+be used for match and merge. The whole list of devices must go in the first row of the txt file. 
+The list of devices must be comma separated. Example usage: `--deviceList "fileWithDeviceIDs.txt"`.
 
 ### Acknowledgements
 
