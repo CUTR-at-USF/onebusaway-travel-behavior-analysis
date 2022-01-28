@@ -147,15 +147,27 @@ def main():
                                                "oba_records_without_match_on_GT.csv")
             unmatched_oba_trips_df.to_csv(path_or_buf=unmatched_file_path, index=False)
 
-        # Calculate difference
+        # Calculate time difference for Origin
         merged_data_frame['Time_Difference'] = merged_data_frame.apply(
-            lambda x: (x['Activity Start Date and Time* (UTC)'] - x['GT_DateTimeOrigUTC_Backup']) / np.timedelta64(1, 's')
+            lambda x: (x['Activity Start Date and Time* (UTC)'] - x['GT_DateTimeOrigUTC_Backup']) / np.timedelta64(1,
+                                                                                                                   's')
             if pd.notna(x['Activity Start Date and Time* (UTC)']) else "", 1)
 
-        # Calculate distance between GT and OBA starting points
+        # Calculate time difference for Destination
+        merged_data_frame['Time_Difference_Destination'] = merged_data_frame.apply(
+            lambda x: (x['Activity Destination Date and Time* (UTC)'] - x['GT_DateTimeDestUTC']) / np.timedelta64(1,
+                                                                                                                  's')
+            if pd.notna(x['Activity Destination Date and Time* (UTC)']) else "", 1)
+
+        # Calculate distance between GT and OBA origin
         merged_data_frame['Distance_Difference'] = merged_data_frame.apply(
             lambda row: hs.haversine((row['GT_LatOrig'], row['GT_LonOrig']),
                                      (row['Origin latitude (*best)'], row['Origin longitude (*best)']),
+                                     unit=Unit.METERS), axis=1)
+        # Calculate distance between GT and OBA destination
+        merged_data_frame['Distance_Difference_Destination'] = merged_data_frame.apply(
+            lambda row: hs.haversine((row['GT_LatDest'], row['GT_LonDest']),
+                                     (row['Destination latitude (*best)'], row['Destination longitude (*best)']),
                                      unit=Unit.METERS), axis=1)
 
         # Add Manual Assignment Column before reorganize
@@ -270,7 +282,7 @@ def merge_to_many(gt_data, oba_data, tolerance):
             # Iterate over each trip of one collector to match it with zero to many activities of an oba_data_user
             for index, row in gt_data_collector.iterrows():
                 bunch_of_matches = oba_data_user[(oba_data_user['Activity Start Date and Time* (UTC)'] >=
-                                                 row['GT_DateTimeOrigUTC']) &
+                                                  row['GT_DateTimeOrigUTC']) &
                                                  (oba_data_user['Activity Start Date and Time* (UTC)'] <=
                                                   row['GT_DateTimeDestUTC'])
                                                  ]
@@ -280,7 +292,8 @@ def merge_to_many(gt_data, oba_data, tolerance):
                 else:
                     len_bunch = bunch_of_matches.shape[0]
                     # Remove matched rows from unmatched trips df
-                    oba_unmatched_trips_df = pd.merge(oba_unmatched_trips_df, bunch_of_matches, indicator=True, how='outer').\
+                    oba_unmatched_trips_df = pd.merge(oba_unmatched_trips_df, bunch_of_matches, indicator=True,
+                                                      how='outer'). \
                         query('_merge=="left_only"').drop('_merge', axis=1)
 
                 subset_df = gt_data_collector.loc[[index], :]
@@ -308,7 +321,7 @@ def merge_to_many(gt_data, oba_data, tolerance):
                 matches_df = pd.concat([matches_df, subset_df], ignore_index=True)
 
             # Reorder the OBA columns
-            oba_unmatched_trips_df= oba_unmatched_trips_df[constants.OBA_UNMATCHED_NEW_COLUMNS_ORDER]
+            oba_unmatched_trips_df = oba_unmatched_trips_df[constants.OBA_UNMATCHED_NEW_COLUMNS_ORDER]
             # Add Collector and device to unmatched trips
             oba_unmatched_trips_df['User ID'] = oba_user[-4:]
             # oba_unmatched_trips_df['GT_Collector'] = collector
