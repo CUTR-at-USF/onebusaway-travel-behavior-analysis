@@ -83,6 +83,11 @@ def preprocess_oba_data(data_csv, min_activity_duration, min_trip_length, remove
                                                                                       '(*best) (UTC)'],
                                                                              errors='coerce', utc=True)
 
+    # Assure that 'Activity Destination Date and Time* (UTC)' is datetime
+    data_csv['Activity Destination Date and Time* (UTC)'] = pd.to_datetime(
+        data_csv['Activity Destination Date and Time* (UTC)'],
+        errors='coerce', utc=True)
+
     # Assure that 'Destination Location Date and Time (*best) (UTC)' is datetime
     data_csv['Destination Location Date and Time (*best) (UTC)'] = pd.to_datetime(
         data_csv['Destination Location Date and Time (*best) (UTC)'],
