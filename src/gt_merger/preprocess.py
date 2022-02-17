@@ -135,9 +135,9 @@ def preprocess_gt_data(gt_data, remove_still_mode):
     unnamed_cols = [col for col in gt_data.columns if 'Unnamed' in col]
     gt_data = gt_data.drop(unnamed_cols, axis=1)
 
-    # Remove records with STILL mode if required
-    if remove_still_mode:
-        gt_data = gt_data[gt_data.GT_Mode != 'STILL']
+    # # Remove records with STILL mode if required
+    # if remove_still_mode:
+    #     gt_data = gt_data[gt_data.GT_Mode != 'STILL']
 
     # Change data type of TimeOrig to string to make possible date-time casting
     gt_data.GT_TimeOrig = gt_data.GT_TimeOrig.astype(str)
@@ -149,8 +149,12 @@ def preprocess_gt_data(gt_data, remove_still_mode):
     # Change the GT_TimeDest column to datetime.time, coerce will produce NaT if the change is not possible
     gt_data['GT_TimeDest'] = pd.to_datetime(gt_data['GT_TimeDest'], errors='coerce').dt.time
 
+    # Remove records with STILL mode if required
+    if remove_still_mode:
+        clean_gt_data = gt_data[gt_data.GT_Mode != 'STILL']
+
     # Drop rows with NaT on GT_Date or GT_TimeOrig
-    clean_gt_data = gt_data.dropna(subset=constants.GT_RELEVANT_COLS_LIST)
+    clean_gt_data = clean_gt_data.dropna(subset=constants.GT_RELEVANT_COLS_LIST)
 
     # Add the data to be dropped to a data frame
     data_gt_dropped = pd.merge(gt_data, clean_gt_data, how='outer', indicator=True).query("_merge != 'both'").drop(
