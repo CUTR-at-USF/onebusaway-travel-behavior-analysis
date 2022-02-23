@@ -115,9 +115,18 @@ def main():
     if list_of_devices:
         oba_data = oba_data[oba_data["User ID"].isin(list_of_devices)]
 
+    # Identify the period of data collection to filter oba data
+    min_data_collection_date = gt_data['GT_DateTimeOrigUTC'].min()
+    # Subtract one day (24 hours) from min data collection date to add padding when filtering
+    min_data_collection_date -= np.timedelta64(1, 'D')
+    max_data_collection_date = gt_data['GT_DateTimeOrigUTC'].max()
+    # Add one day (24 hours) to max data collection date to add padding when filtering
+    max_data_collection_date += np.timedelta64(1, 'D')
+
     # Preprocess OBA data
     oba_data, data_csv_dropped = preprocess_oba_data(oba_data, command_line_args.minActivityDuration,
-                                                     command_line_args.minTripLength, command_line_args.removeStillMode)
+                                                     command_line_args.minTripLength, command_line_args.removeStillMode,
+                                                     min_data_collection_date, max_data_collection_date)
     print("OBA data preprocessed.")
     print(oba_data.info())
     print(gt_data.info())
@@ -260,7 +269,12 @@ def merge_to_many(gt_data, oba_data, tolerance):
     matches_df = pd.DataFrame()
     all_unmatched_trips_df = pd.DataFrame()
 
+    # Create dictionary to hold the values of unmatched oba trips for each obea_user
+    # between collector iterations
+    dict_oba_unmatched_trips = dict()
+
     list_total_trips = []
+
     for collector in list_collectors:
         print("Merging data for collector ", collector)
         # Create dataframe for a collector on list_collectors
@@ -276,24 +290,25 @@ def merge_to_many(gt_data, oba_data, tolerance):
             # Make sure dataframes is sorted by 'Activity Start Date and Time* (UTC)'
             oba_data_user.sort_values('Activity Start Date and Time* (UTC)', inplace=True)
 
-            # Create df for OBA trips without GT Data match
-            oba_unmatched_trips_df = oba_data_user.copy()
+            # Add oba trips for oba_user in one dict entry (setdefault only modifies the dict the first time)
+            dict_oba_unmatched_trips.setdefault(oba_user, oba_data_user.copy())
 
             # Iterate over each trip of one collector to match it with zero to many activities of an oba_data_user
             for index, row in gt_data_collector.iterrows():
-                bunch_of_matches = oba_data_user[(oba_data_user['Activity Start Date and Time* (UTC)'] >=
-                                                  row['GT_DateTimeOrigUTC']) &
-                                                 (oba_data_user['Activity Start Date and Time* (UTC)'] <=
-                                                  row['GT_DateTimeDestUTC'])
-                                                 ]
-                # Get the size of bunch_of_matches to create a repeated dataframe to concatenate with
+                bunch_of_matches = dict_oba_unmatched_trips[oba_user][
+                    (dict_oba_unmatched_trips[oba_user]['Activity Start Date and Time* (UTC)'] >=
+                     row['GT_DateTimeOrigUTC']) &
+                    (dict_oba_unmatched_trips[oba_user]['Activity Start Date and Time* (UTC)'] <=
+                     row['GT_DateTimeDestUTC'])
+                    ]
+                # Use the size of bunch_of_matches to create a repeated dataframe to concatenate with
                 if bunch_of_matches.empty:
                     len_bunch = 1
                 else:
                     len_bunch = bunch_of_matches.shape[0]
-                    # Remove matched rows from unmatched trips df
-                    oba_unmatched_trips_df = pd.merge(oba_unmatched_trips_df, bunch_of_matches, indicator=True,
-                                                      how='outer'). \
+                    # Remove matched rows from unmatched trips df of oba_user
+                    dict_oba_unmatched_trips[oba_user] = pd.merge(dict_oba_unmatched_trips[oba_user], bunch_of_matches,
+                                                                  indicator=True, how='outer'). \
                         query('_merge=="left_only"').drop('_merge', axis=1)
 
                 subset_df = gt_data_collector.loc[[index], :]
@@ -321,13 +336,14 @@ def merge_to_many(gt_data, oba_data, tolerance):
                 matches_df = pd.concat([matches_df, subset_df], ignore_index=True)
 
             # Reorder the OBA columns
-            oba_unmatched_trips_df = oba_unmatched_trips_df[constants.OBA_UNMATCHED_NEW_COLUMNS_ORDER]
+            dict_oba_unmatched_trips[oba_user] = dict_oba_unmatched_trips[oba_user][constants.OBA_UNMATCHED_NEW_COLUMNS_ORDER]
             # Add Collector and device to unmatched trips
-            oba_unmatched_trips_df['User ID'] = oba_user[-4:]
-            # oba_unmatched_trips_df['GT_Collector'] = collector
-            oba_unmatched_trips_df.insert(loc=0, column='GT_Collector', value=collector)
-            # Append the unmatched trips per collector/device to the all unmatched df
-            all_unmatched_trips_df = pd.concat([all_unmatched_trips_df, oba_unmatched_trips_df], ignore_index=True)
+            dict_oba_unmatched_trips[oba_user]['User ID'] = oba_user[-4:]
+
+    # Concatenate unmatched trips from each oba_user into one single dataframe
+    for oba_user in list_oba_users:
+        all_unmatched_trips_df = pd.concat([all_unmatched_trips_df, dict_oba_unmatched_trips[oba_user]],
+                                           ignore_index=True)
 
     return merged_df, matches_df, all_unmatched_trips_df
 
