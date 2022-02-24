@@ -128,8 +128,6 @@ def main():
                                                      command_line_args.minTripLength, command_line_args.removeStillMode,
                                                      min_data_collection_date, max_data_collection_date)
     print("OBA data preprocessed.")
-    print(oba_data.info())
-    print(gt_data.info())
 
     # Data preprocessing IS OVER
     # Save oba dropped data to a csv file
