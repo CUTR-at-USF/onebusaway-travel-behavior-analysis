@@ -20,7 +20,7 @@ import unittest
 import pandas as pd
 
 from src.gt_merger import preprocess, constants
-from src.gt_merger.matchAndMerge import merge
+from src.gt_merger.matchAndMerge import merge_to_many
 
 
 class MergeTest(unittest.TestCase):
@@ -32,11 +32,14 @@ class MergeTest(unittest.TestCase):
         """ Load dataframes used to perform tests. """
         oba_file_path = os.path.join(os.path.dirname(__file__), 'data_test/travel-behavior-test.csv')
         self.oba_df = pd.read_csv(oba_file_path)
-        self.clean_oba_df, _ = preprocess.preprocess_oba_data(self.oba_df, 5, 50, True)
+        self.start_data_collection_date = pd.to_datetime('2019-06-16T00:00:00Z', errors='coerce', utc=True)
+        self.end_data_collection_date = pd.to_datetime('2019-06-19T00:00:00Z', errors='coerce', utc=True)
+        self.clean_oba_df, _ = preprocess.preprocess_oba_data(self.oba_df, 5, 50, True, self.start_data_collection_date,
+                                                              self.end_data_collection_date)
         gt_file_path = os.path.join(os.path.dirname(__file__), 'data_test/GT_test.xlsx')
         self.gt_df = pd.read_excel(gt_file_path, engine='openpyxl')
         self.clean_gt_df, _ = preprocess.preprocess_gt_data(self.gt_df, True)
-        self.merged_data_frame, _ = merge(self.clean_gt_df, self.clean_oba_df, 3000)
+        self.merged_data_frame, _, _ = merge_to_many(self.clean_gt_df, self.clean_oba_df, 3000)
         pass
 
     def tearDown(self):
