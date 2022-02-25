@@ -78,13 +78,14 @@ def preprocess_oba_data(data_csv, min_activity_duration, min_trip_length, remove
                                                                      errors='coerce', utc=True)
 
     #  Filter oba data using min and max activity start date and time
-    data_csv = data_csv[(data_csv['Activity Start Date and Time* (UTC)'] >= min_data_collection_date) &
+    data_csv = data_csv.copy()[(data_csv['Activity Start Date and Time* (UTC)'] >= min_data_collection_date) &
                         (data_csv['Activity Start Date and Time* (UTC)'] <= max_data_collection_date)]
 
     # Assure that 'Origin location Date and Time (*best) (UTC)' is datetime
-    data_csv['Origin location Date and Time (*best) (UTC)'] = pd.to_datetime(data_csv['Origin location Date and Time '
-                                                                                      '(*best) (UTC)'],
-                                                                             errors='coerce', utc=True)
+    data_csv.loc[:, 'Origin location Date and Time (*best) (UTC)'] = pd.to_datetime(data_csv.loc[:, 'Origin location '
+                                                                                                    'Date and Time '
+                                                                                                    '(*best) (UTC)'],
+                                                                                    errors='coerce', utc=True)
 
     # Assure that 'Activity Destination Date and Time* (UTC)' is datetime
     data_csv['Activity Destination Date and Time* (UTC)'] = pd.to_datetime(

@@ -284,7 +284,7 @@ def merge_to_many(gt_data, oba_data, tolerance):
         i = 0
         for oba_user in list_oba_users:
             # Create a dataframe with the oba_user activities only
-            oba_data_user = oba_data[oba_data["User ID"] == oba_user]
+            oba_data_user = oba_data.copy()[oba_data["User ID"] == oba_user]
             # Make sure dataframes is sorted by 'Activity Start Date and Time* (UTC)'
             oba_data_user.sort_values('Activity Start Date and Time* (UTC)', inplace=True)
 
