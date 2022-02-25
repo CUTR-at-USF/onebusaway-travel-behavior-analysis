@@ -143,11 +143,14 @@ def main():
         first_tol = constants.TOLERANCE
 
     for tol in range(first_tol, command_line_args.tolerance + 1, constants.CALCULATE_EVERY_N_SECS):
-        print("TOLERANCE:", str(tol))
+        if command_line_args.iterateOverTol:
+            print("TOLERANCE:", str(tol))
         # merge dataframes one to one or one to many according to the commandline parameter
         if command_line_args.mergeOneToOne:
+            print("Using merging one-to-one algorithm")
             merged_data_frame, num_matches_df = merge(gt_data, oba_data, tol)
         else:
+            print("Using merge one-to-many algorithm")
             merged_data_frame, num_matches_df, unmatched_oba_trips_df = merge_to_many(gt_data, oba_data, tol)
             # Save unmatched oba records to csv
             unmatched_file_path = os.path.join(command_line_args.outputDir, save_to_path,
